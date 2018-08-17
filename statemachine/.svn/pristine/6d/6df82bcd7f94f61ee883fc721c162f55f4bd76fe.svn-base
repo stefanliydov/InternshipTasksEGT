@@ -1,0 +1,84 @@
+package statemachine;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+import resources.MachineLoader;
+
+public class SelectingItemStateTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void addSomeCashInMachine() {
+	machine = new VendingMachine();
+	MachineLoader.loadMachine(machine);
+	machine.putCoins(400L);
+    }
+
+    @Test
+    public void machineShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldGoToServiceAndReturnMoney() {
+	final long currAmount = machine.getCoins();
+	Assert.assertEquals(currAmount, 400L);
+	Assert.assertTrue(machine.service());
+	final long result = machine.getCoins();
+	Assert.assertEquals(result, 0L);
+    }
+
+    @Test
+    public void machineShouldAcceptCoinsAndNotChangeState() {
+	machine.putCoins(100L);
+
+	final long coins = machine.getCoins();
+
+	Assert.assertEquals(coins, 500L);
+    }
+
+    @Test
+    public void machineShouldLetYouSelectItemIfMoneyIsEnough() {
+	Assert.assertTrue(machine.selectItem("Kit-Kat") != null);
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfMoneyIsNotEnough() {
+	machine.returnMoney();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(1, 5));
+	Assert.assertFalse(machine.selectItem("Kit-Kat") != null);
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfThereIsntEnoughQuantity() {
+	machine.returnMoney();
+	machine.addProduct("dummyProduct", ThreadLocalRandom.current().nextLong(20, 400), 1);
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 1000));
+	machine.selectItem("dummyProduct");
+	machine.takeItem();
+	Assert.assertFalse(machine.selectItem("dummyProduct") != null);
+    }
+
+    @Test
+    public void machineShouldNotLetYouAddProductsWhileItsWorking() {
+	Assert.assertFalse(machine.addProduct("dummyProduct", 10L, 1));
+    }
+
+    @Test
+    public void machineShouldSelectItemAndThenTakeTheMoneyForIt() {
+	Long moneyLeft = 400L;
+
+	machine.selectItem("Kit-Kat");
+	moneyLeft -= machine.getItemPrice("Kit-Kat");
+	final Long coins = machine.getCoins();
+
+	Assert.assertEquals(coins, moneyLeft);
+    }
+
+}

@@ -1,0 +1,76 @@
+package egt.interactive.testing_framework;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import egt.interactive.testing_framework.Test.Test;
+import egt.interactive.testing_framework.Test.TestPackage;
+import egt.interactive.testing_framework.io.ConsoleIO;
+import egt.interactive.testing_framework.io.IO;
+
+public class MethodsClaimer {
+
+    private final IO io;
+    private final Test testFramework;
+
+    private final Map<Class<?>, TestPackage> testPackages;
+
+    public MethodsClaimer(final IO io, final Test testFramework) {
+	this.io = io;
+	this.testFramework = testFramework;
+	this.testPackages = new HashMap<>();
+    }
+
+    public MethodsClaimer(final Test testFramework) {
+	this.io = new ConsoleIO();
+	this.testFramework = testFramework;
+	this.testPackages = new HashMap<>();
+
+    }
+
+    public void loadClasses(final String... classes) {
+	testPackages.putAll(testFramework.readMethodsFromClass(classes));
+    }
+
+    public void loadClasses(final Collection<String> classes) {
+	loadClasses((String[]) classes.toArray(new String[0]));
+    }
+
+    public void loadClasses(final String clazzName) {
+	loadClasses(new String[] { clazzName });
+
+    }
+
+    public void run() {
+	areClassesLoaded();
+
+	for (Entry<Class<?>, TestPackage> entry : testPackages.entrySet()) {
+	    final TestPackage testPackage = entry.getValue();
+	    final Object obj = getClassInstance(entry.getKey());
+	    testFramework.runBeforeTests(obj, testPackage.getBeforeTestMethods());
+
+	    testFramework.runTests(obj, testPackage.getTestMethods(), entry.getValue().getDataProviders(), this.io);
+	    testFramework.runAfterTests(obj, testPackage.getAfterTestMethods());
+	}
+    }
+
+    private Object getClassInstance(final Class<?> clazz) {
+	try {
+	    final Constructor<?> constructor = clazz.getConstructor();
+	    return constructor.newInstance();
+	} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException
+		| InstantiationException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    private void areClassesLoaded() {
+	if (this.testPackages.size() == 0) {
+	    throw new RuntimeException("No classes were found! Please load classes first and then run them.");
+	}
+    }
+}

@@ -1,0 +1,13 @@
+package com.egtinteractive.data_structures.resources;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class NumberGenerator {
+
+    
+    public static int generate(int n){
+	return ThreadLocalRandom.current().nextInt(n);
+    }
+    public static int generate(int k,int n){
+	return ThreadLocalRandom.current().nextInt(k,n);
+    }
+}

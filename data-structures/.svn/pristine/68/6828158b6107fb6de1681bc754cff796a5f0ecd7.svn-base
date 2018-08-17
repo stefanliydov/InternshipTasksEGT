@@ -1,0 +1,56 @@
+package com.egtinteractive.data_structures.list;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.MyDataProvider;
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class ContainsTests {
+    private static final int ZERO = 0;
+    private int size;
+
+    @DataProvider(name = "getClass")
+    public Object[][] getData() {
+	return MyDataProvider.getListDataProvider();
+    }
+
+    @BeforeClass
+    public void setSize() {
+	size = NumberGenerator.generate(25, 50);
+    }
+
+    @Test(dataProvider = "getClass")
+    public void containsShouldReturnTrueIfContains(List<Integer> list) {
+
+	for (int i = ZERO; i < size; i++) {
+	    list.add(i);
+	}
+
+	for (int i = ZERO; i < size; i++) {
+	    Assert.assertTrue(list.contains(i));
+	}
+
+    }
+
+    @Test(dataProvider = "getClass")
+    public void containsShouldReturnFalseIfNotContains(List<Integer> list) {
+	for (int i = ZERO; i < size; i++) {
+	    list.add(i);
+	}
+
+	for (int i = ZERO; i < size; i++) {
+	    final int num = NumberGenerator.generate(51, 200);
+	    Assert.assertFalse(list.contains(num));
+	}
+    }
+
+    @Test(dataProvider = "getClass")
+    public void containsOnAnEmptyListShouldReturnFalse(List<Integer> list) {
+	final boolean result = list.contains(NumberGenerator.generate(25));
+	Assert.assertFalse(result);
+    }
+
+}

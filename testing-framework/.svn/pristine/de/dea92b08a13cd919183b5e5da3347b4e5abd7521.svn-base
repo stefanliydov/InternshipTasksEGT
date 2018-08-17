@@ -1,0 +1,213 @@
+package egt.interactive.testing_framework;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import egt.interactive.testing_framework.enums.TestingAnnotations;
+import egt.interactive.testing_framework.io.ConsoleIO;
+import egt.interactive.testing_framework.io.IO;
+
+public class MethodsClaimer {
+
+    private final IO io;
+    private final TestingAnnotations annotations;
+    private List<String> loadedClasses;
+
+    public MethodsClaimer(final IO io, final TestingAnnotations annotations) {
+	this.io = io;
+	this.annotations = annotations;
+    }
+
+    public MethodsClaimer(final TestingAnnotations annotations) {
+	this.io = new ConsoleIO();
+	this.annotations = annotations;
+    }
+
+    public void loadClasses(final List<String> classes) {
+	this.loadedClasses = classes;
+    }
+
+    public void run() {
+	areClassesLoaded();
+	Class<?> c = null;
+	final Map<String, Method> dataProviders = new HashMap<>();
+	Object testClass = null;
+	for (int i = 0; i < loadedClasses.size(); i++) {
+
+	    c = getClassForName(loadedClasses.get(i));
+	    testClass = getClassInstance(c);
+
+	    final Method[] methods = c.getMethods();
+	    runBeforeTestMethodsAndGetDataProviders(dataProviders, methods, testClass);
+
+	    runTests(dataProviders, methods, testClass);
+	    runAfterTests(methods, testClass);
+	}
+
+    }
+
+    private void runTests(final Map<String, Method> dataProviders, final Method[] methods, final Object testClass) {
+
+	for (Method method : methods) {
+	    final Annotation annotation = method.getAnnotation(annotations.getTestAnnotation());
+	    if (Objects.nonNull(annotation)) {
+
+		final String dataProvider = (String) getAnnotationValue(annotation, "dataProvider");
+
+		@SuppressWarnings("unchecked")
+		final Class<? extends Throwable>[] expectedExceptions = (Class<? extends Throwable>[]) getAnnotationValue(
+			annotation, "expectedExceptions");
+
+		try {
+		    if (!dataProvider.equals("")) {
+			final Method dataProviderMethod = dataProviders.get(dataProvider);
+			final Object[][] objects = (Object[][]) dataProviderMethod.invoke(testClass);
+			runTestWithDataProvider(testClass, method, objects, expectedExceptions);
+
+		    } else {
+			runTest(testClass, method, expectedExceptions);
+		    }
+		} catch (AssertionError | Exception e) {
+		    io.write(String.format("FAILED: %s()", method.getName()));
+		    e.printStackTrace();
+		}
+	    }
+	}
+    }
+
+    private void runTest(final Object testClass, final Method method,
+	    final Class<? extends Throwable>[] expectedExceptions) {
+	try {
+	    method.invoke(testClass);
+	    if (expectedExceptions.length > 0) {
+		throw new AssertionError("Expected exception was not thrown!");
+	    }
+	} catch (Exception e) {
+	    boolean found = false;
+	    for (Class<?> err : expectedExceptions) {
+		if (err.equals(e.getCause().getClass())) {
+		    found = true;
+		    break;
+		}
+	    }
+	    if (!found) {
+		throw new AssertionError(e.getCause());
+	    }
+	}
+	io.write(String.format("PASSED: %s()", method.getName()));
+
+    }
+
+    private void runTestWithDataProvider(final Object testClass, final Method method, final Object[][] objects,
+	    final Class<? extends Throwable>[] expectedExceptions) {
+
+	for (int j = 0; j < objects.length; j++) {
+	    try {
+		method.invoke(testClass, objects[j]);
+		if (expectedExceptions.length > 0) {
+		    throw new AssertionError("Expected exception was not thrown!");
+		}
+	    } catch (Exception e) {
+		boolean found = false;
+		for (Class<?> err : expectedExceptions) {
+		    if (err.equals(e.getCause().getClass())) {
+			found = true;
+			break;
+		    }
+		}
+		if (!found) {
+		    throw new AssertionError(e.getCause());
+		}
+	    }
+	    final String parameters = getParameters(objects[j]);
+	    io.write(String.format("PASSED: %s(%s)", method.getName(), parameters));
+
+	}
+
+    }
+
+    private void runBeforeTestMethodsAndGetDataProviders(final Map<String, Method> dataProviders,
+	    final Method[] methods, final Object testClass) {
+	for (Method method : methods) {
+	    if (method.isAnnotationPresent(annotations.getDataProviderAnnotation())) {
+		final Annotation annotation = method.getAnnotation(annotations.getDataProviderAnnotation());
+
+		final String dataProviderName = (String) getAnnotationValue(annotation, "name");
+
+		dataProviders.put(dataProviderName, method);
+	    }
+
+	    if (method.isAnnotationPresent(annotations.getBeforeTestAnnotation())) {
+		try {
+		    method.invoke(testClass);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		    e.printStackTrace();
+		}
+	    }
+	}
+    }
+
+    private Object getAnnotationValue(final Annotation annotation, final String methodName) {
+	final Class<? extends Annotation> annotationType = annotation.annotationType();
+	try {
+	    final Method targetMethod = annotationType.getMethod(methodName);
+	    return targetMethod.invoke(annotation);
+	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+		| SecurityException e) {
+	    throw new RuntimeException(e);
+	}
+
+    }
+
+    private Class<?> getClassForName(final String string) {
+	try {
+	    return Class.forName(string);
+	} catch (ClassNotFoundException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    private Object getClassInstance(final Class<?> c) {
+	try {
+	    final Constructor<?> constructor = c.getConstructor();
+	    return constructor.newInstance();
+	} catch (NoSuchMethodException e) {
+	    throw new RuntimeException(e);
+	} catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    private String getParameters(final Object[] objects) {
+	return String.join(", ",
+		Arrays.asList(objects).stream().map(x -> x.getClass().getCanonicalName()).collect(Collectors.toList()));
+    }
+
+    private void runAfterTests(final Method[] methods, final Object testClass) {
+	for (Method method : methods) {
+	    if (method.isAnnotationPresent(annotations.getAfterAnnotation())) {
+		try {
+		    method.invoke(testClass);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		    e.printStackTrace();
+		}
+	    }
+
+	}
+    }
+
+    private void areClassesLoaded() {
+	if (this.loadedClasses == null) {
+	    throw new RuntimeException("No classes were found! Please load classes first and then run them.");
+	}
+    }
+}

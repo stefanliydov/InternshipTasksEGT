@@ -1,0 +1,102 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.MyDataProvider;
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class RemoveTests {
+
+    private static final int ONE = 1;
+    private static final int ZERO = 0;
+    private int size;
+
+    @DataProvider(name = "getClassStrategy")
+    public Object[][] getData() {
+	return MyDataProvider.getMapDataProvider();
+    }
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(70, 150);
+    }
+
+
+
+    @Test(dataProvider = "getClassStrategy")
+    public void removeShouldRemoveCorrectlyKeyAndValue(Map<Character,Integer> map) {
+	for (int i = ONE; i < 20; i++) {
+	    map.put((char) i, i);
+	}
+	for (int i = ONE; i < 20; i++) {
+	    map.remove((char) i);
+	    final boolean keyResult = map.containsKey((char) i);
+	    final boolean valueResult = map.containsValue(i);
+	    Assert.assertFalse(keyResult);
+	    Assert.assertFalse(valueResult);
+	}
+	Assert.assertEquals(map.size(), ZERO);
+    }
+
+    @Test(dataProvider = "getClassStrategy")
+    public void removeShouldWorkOnAFullMapWithChainedElements(Map<Character,Integer> map) {
+	for (int i = ONE; i < this.size; i++) {
+	    map.put((char) i, i);
+	}
+
+	int mapSize = map.size();
+	for (int i = ONE; i < this.size; i++) {
+	    map.remove((char) i);
+	    Assert.assertEquals(map.size(), --mapSize);
+	}
+    }
+
+    @Test(dataProvider = "getClassStrategy")
+    public void removeShouldReturnNullIfEntryIsNotPresent(Map<Character,Integer> map) {
+	for (int i = ONE; i < this.size; i++) {
+	    map.put((char) i, i);
+	}
+	final Integer result = map.get((char) (this.size + 1));
+	Assert.assertNull(result);
+    }
+
+    @Test(dataProvider = "getClassStrategy")
+    public void removeShouldNotDecreaseSizeIfEntryIsNotPresent(Map<Character,Integer> map) {
+	for (int i = ONE; i < this.size; i++) {
+	    map.put((char) i, i);
+	}
+
+	final int secondSize = NumberGenerator.generate(200, 250);
+	final int mapSize = map.size();
+	for (int i = this.size; i < secondSize; i++) {
+	    map.remove((char) i);
+	    final int result = map.size();
+	    Assert.assertEquals(result, mapSize);
+	}
+    }
+
+    @Test(dataProvider = "getClassStrategy")
+    public void removeShouldReturnCorrectValue(Map<Character,Integer> map) {
+	for (int i = ONE; i <= this.size; i++) {
+	    map.put((char) i, i);
+	}
+
+	for (int i = this.size; i >= ONE; i--) {
+	    final int result = map.remove((char) i);
+	    Assert.assertEquals(result, i);
+	}
+    }
+
+    @Test(dataProvider = "getClassStrategy")
+    public void removeWithOneElementShouldClearMap(Map<Character,Integer> map) {
+	final int num = NumberGenerator.generate(150);
+	map.put((char) num, num);
+	final int result = map.remove((char) num);
+	Assert.assertEquals(result, num);
+	Assert.assertEquals(map.size(), ZERO);
+    }
+
+}

@@ -1,0 +1,197 @@
+package com.egtinteractive.data_structures.map;
+
+public class MyMap<K, V> implements Map<K, V> {
+
+    private static final int DEFAULT_SIZE = 16;
+    private Entry<K, V>[] buckets;
+    private int size;
+
+    @SuppressWarnings("unchecked")
+    public MyMap() {
+	this.buckets = new Entry[DEFAULT_SIZE];
+	this.size = 0;
+    }
+
+    @Override
+    public V get(K key) {
+	final int hashCode = this.getKeyHash(key);
+
+	Entry<K, V> currEntry = this.buckets[hashCode];
+
+	while (currEntry != null) {
+	    if (currEntry.getKey().equals(key)) {
+		return currEntry.getValue();
+	    }
+	    currEntry = currEntry.getNext();
+	}
+
+	return null;
+    }
+
+    @Override
+    public V put(K key, V value) {
+	final Entry<K, V> newEntry = new Entry<>(key, value);
+	final int hashCode = newEntry.hashCode();
+	Entry<K, V> currEntry = this.buckets[hashCode];
+	if (currEntry == null) {
+	    this.buckets[hashCode] = newEntry;
+	    this.size++;
+	    return value;
+	}
+	while (currEntry.getNext() != null) {
+	    if (currEntry.equals(newEntry)) {
+		currEntry.setValue(value);
+		return value;
+	    }
+	    currEntry = currEntry.getNext();
+	}
+	if (currEntry.equals(newEntry)) {
+	    currEntry.setValue(value);
+	    return value;
+	}
+	currEntry.setNext(newEntry);
+	this.size++;
+	return value;
+    }
+
+    @Override
+    public V remove(K key) {
+	final int hashCode = this.getKeyHash(key);
+	Entry<K, V> parentEntry = this.buckets[hashCode];
+	if (parentEntry == null) {
+	    return null;
+	}
+	if (parentEntry.getKey().equals(key)) {
+	    this.buckets[hashCode] = parentEntry.getNext();
+	    size--;
+	    return parentEntry.getValue();
+	}
+	Entry<K, V> currEntry = parentEntry.getNext();
+
+	while (currEntry != null) {
+
+	    if (currEntry.getKey().equals(key)) {
+		parentEntry.setNext(currEntry.getNext());
+		size--;
+		return currEntry.value;
+	    }
+	    parentEntry = currEntry;
+	    currEntry = currEntry.getNext();
+	}
+
+	return null;
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+	final int hashCode = this.getKeyHash(key);
+	Entry<K, V> currEntry = this.buckets[hashCode];
+
+	while (currEntry != null) {
+	    if (currEntry.getKey().equals(key))
+		return true;
+	    currEntry = currEntry.getNext();
+	}
+
+	return false;
+    }
+
+    @Override
+    public boolean containsValue(V value) {
+
+	for (int i = 0; i < buckets.length; i++) {
+	    Entry<K, V> currEntry = this.buckets[i];
+
+	    while (currEntry != null) {
+		if (currEntry.getValue().equals(value))
+		    return true;
+		currEntry = currEntry.getNext();
+	    }
+
+	}
+
+	return false;
+    }
+
+    @Override
+    public int size() {
+	// TODO Auto-generated method stub
+	return this.size;
+    }
+
+    @Override
+    public void clear() {
+	this.size = 0;
+	this.buckets = new Entry[DEFAULT_SIZE];
+
+    }
+
+    private static class Entry<K, V> {
+
+	private Entry<K, V> next;
+	private K key;
+	private V value;
+
+	public Entry(K key, V value) {
+	    super();
+	    this.key = key;
+	    this.value = value;
+	}
+
+	public Entry<K, V> getNext() {
+	    return next;
+	}
+
+	public void setNext(Entry<K, V> next) {
+	    this.next = next;
+	}
+
+	public K getKey() {
+	    return key;
+	}
+
+	public V getValue() {
+	    return value;
+	}
+	public void setValue(V value){
+	    this.value = value;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+	    if (obj == null) {
+		return false;
+	    }
+	    if (!Entry.class.isAssignableFrom(obj.getClass())) {
+		return false;
+	    }
+
+	    final Entry<K, V> otherObj = (Entry<K, V>) obj;
+	    final boolean result = this.key.equals(otherObj.getKey());
+	    return result;
+	}
+
+	@Override
+	public int hashCode() {
+	    int hashCode = 0;
+	    String str = String.valueOf(this.key);
+	    for (int i = 0; i < str.length(); i++) {
+		hashCode += (int) str.charAt(i);
+	    }
+	    hashCode %= 16;
+	    return hashCode;
+	}
+
+    }
+
+    private int getKeyHash(K key) {
+	int hashCode = 0;
+	String str = String.valueOf(key);
+	for (int i = 0; i < str.length(); i++) {
+	    hashCode += (int) str.charAt(i);
+	}
+	hashCode %= 16;
+	return hashCode;
+    }
+
+}

@@ -1,0 +1,80 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class PutTests {
+
+    private static final int ONE = 1;
+    private Map<Character, Integer> map;
+    private int size;
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(150, 300);
+    }
+
+    @BeforeMethod
+    public void mapReset() {
+	this.map = new MyMap<>();
+
+    }
+
+    @Test
+    public void putShouldAddKeyAndValueTogether() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	for (int i = ONE; i < this.size; i++) {
+	    final int result = this.map.get((char) i);
+	    Assert.assertEquals(result, i);
+	}
+
+    }
+
+    @Test
+    public void putOnElementsWithSameHashCodeShouldAddCorrectly() {
+	for (int i = ONE; i < this.size; i += 16) {
+	    this.map.put((char) i, i);
+	}
+	for (int i = ONE; i < this.size; i += 16) {
+	    final int result = map.get((char) i);
+	    Assert.assertEquals(result, i);
+	}
+    }
+
+    @Test
+    public void putShouldNotAddElementsThatAlreadyExist() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put('A', i);
+	}
+	Assert.assertEquals(this.map.size(), 1);
+
+    }
+
+    @Test
+    public void putOnAFullListShouldIncreaseSizeAndChainElements() {
+	for (int i = ONE; i <= 90; i++) {
+	    this.map.put((char) i, i);
+	}
+
+	Assert.assertEquals(this.map.size(), 90);
+    }
+
+    @Test
+    public void putShouldIncreaseSizeIfSuccesful() {
+	for (int i = ONE; i <= this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	for (int i = ONE; i <= this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	Assert.assertEquals(this.map.size(), this.size);
+
+    }
+
+}

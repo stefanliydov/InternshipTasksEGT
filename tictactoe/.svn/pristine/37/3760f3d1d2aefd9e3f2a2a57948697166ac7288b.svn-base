@@ -1,0 +1,7 @@
+package egt.interactive.tic_tac_toe.interfaces;
+
+public interface BoardDrawer {
+
+    public void drawBoard(Board board);
+
+}

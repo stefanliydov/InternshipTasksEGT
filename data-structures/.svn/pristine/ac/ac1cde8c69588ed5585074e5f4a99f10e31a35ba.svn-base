@@ -1,0 +1,231 @@
+package com.egtinteractive.data_structures.tree;
+
+import java.util.Iterator;
+
+public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
+
+    private Node root;
+    private int size;
+
+    public BinaryTree() {
+	this.size = 0;
+    }
+
+    @Override
+    public void add(T key) {
+	if (this.root == null) {
+	    this.root = new Node(key);
+	    this.size++;
+	    return;
+	}
+	if (add(key, null, this.root)) {
+	    this.size++;
+	}
+
+    }
+
+    private boolean add(T key, Node parent, Node node) {
+	if (node == null) {
+	    final int compare = key.compareTo(parent.value);
+	    node = new Node(key);
+	    if (compare < 0) {
+		parent.leftChild = node;
+	    } else {
+		parent.rightChild = node;
+	    }
+	    return true;
+	}
+	int compare = key.compareTo(node.value);
+	if (compare < 0) {
+	    return add(key, node, node.leftChild);
+	} else if (compare > 0) {
+	    return add(key, node, node.rightChild);
+	}
+	return false;
+    }
+
+    @Override
+    public boolean remove(T element) {
+	if (this.root == null) {
+	    return false;
+	}
+	final int beforeSize = this.size();
+	this.root = remove(element, this.root);
+	if (beforeSize != this.size()) {
+	    return true;
+	}
+	return false;
+    }
+
+    private Node remove(T element, Node node) {
+	if (node == null) {
+	    return node;
+	}
+	final int compare = element.compareTo(node.value);
+	if (compare < 0) {
+	    node.leftChild = remove(element, node.leftChild);
+	} else if (compare > 0) {
+	    node.rightChild = remove(element, node.rightChild);
+	} else {
+	    this.size--;
+	    if (node.rightChild == null && node.leftChild == null) {
+		return null;
+	    } else if (node.rightChild == null) {
+		return node.leftChild;
+	    } else if (node.leftChild == null) {
+		return node.rightChild;
+	    } else {
+		node.value = minValue(node.rightChild);
+		node.rightChild = remove(node.value, node.rightChild);
+	    }
+	}
+	return node;
+    }
+
+    private T minValue(Node root) {
+	T minValue = root.value;
+	while (root.leftChild != null) {
+	    minValue = root.leftChild.value;
+	    root = root.leftChild;
+	}
+	return minValue;
+    }
+
+    @Override
+    public T lower(T element) {
+	if (this.root == null) {
+	    return null;
+	}
+	return lower(this.root, element);
+//	int highestLessThanElement =Integer.MIN_VALUE;
+//	
+//	Node currElement = this.root;
+//	
+//	while(currElement != null){
+////	    if(currElement.value.compareTo(highestLessThanElement)){
+////		
+////	    }
+//	    final int compare = currElement.value.compareTo(element);
+//	    if(compare>=0){
+//		currElement = currElement.leftChild;
+//	    }else{
+//		currElement = currElement.rightChild;
+//	    }
+//	    
+//	}
+//	
+	
+    }
+
+    private T lower(Node node, T element) {
+	if (node.leftChild == null && node.rightChild == null && node.value.compareTo(element) > 0) {
+	    return null;
+	}
+	final int compare = node.value.compareTo(element);
+	if ((compare < 0 && node.rightChild == null) || (compare < 0 && node.rightChild.value.compareTo(element) > 0)) {
+	    return node.value;
+	}
+
+	if (compare >= 0) {
+	    return lower(node.leftChild, element);
+	} else
+	    return lower(node.rightChild, element);
+    }
+
+    @Override
+    public T higher(T element) {
+	if (this.root == null) {
+	    return null;
+	}
+	return higher(this.root, null, element);
+    }
+
+    private T higher(Node node, Node parentNode, T element) {
+	if (node == null) {
+	    final int parentCompare = element.compareTo(parentNode.value);
+	    if (parentCompare < 0) {
+		return node.value;
+	    } else {
+		return null;
+	    }
+	}
+
+	final int compare = element.compareTo(node.value);
+	if (compare == -1) {
+	    return node.value;
+	} else if (compare == 0 && node.rightChild == null) {
+	    return parentNode.value;
+	} else if (compare >= 0) {
+	    return higher(node.rightChild, node, element);
+	} else {
+	    return higher(node.leftChild, node, element);
+	}
+    }
+
+    @Override
+    public T pollFirst() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public T pollLast() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    @Override
+    public int size() {
+	return this.size;
+    }
+
+    @Override
+    public void clear() {
+	this.root = null;
+	this.size = 0;
+
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    private class Node {
+
+	private T value;
+	private Node leftChild;
+	private Node rightChild;
+
+	public Node(T value) {
+	    super();
+	    this.value = value;
+	}
+
+	public T getValue() {
+	    return value;
+	}
+
+	public void setValue(T value) {
+	    this.value = value;
+	}
+
+	public Node getLeftChild() {
+	    return leftChild;
+	}
+
+	public void setLeftChild(Node left) {
+	    this.leftChild = left;
+	}
+
+	public Node getRightChild() {
+	    return rightChild;
+	}
+
+	public void setRightChild(Node right) {
+	    this.rightChild = right;
+	}
+
+    }
+}

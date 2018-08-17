@@ -1,0 +1,57 @@
+package com.egtinteractive.data_structures.list;
+
+import java.util.UUID;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.generator.NumberGenerator;
+
+public class IteratorTests {
+    private final int ZERO = 0;
+    private int size;
+
+    @DataProvider(name = "getClass")
+    public Object[][] getData() {
+	return new Object[][] { { new ArrayList<>() }, { new LinkedList<>() } };
+    }
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(50, 150);
+    }
+
+    @Test(dataProvider = "getClass")
+    public void shouldIterateCorrectly(List<Integer> list) {
+	int[] arr = new int[size];
+	for (int i = ZERO; i < this.size; i++) {
+	    final int num = NumberGenerator.generate(20000);
+	    list.add(num);
+	    arr[i] = num;
+	}
+
+	int[] resultArray = new int[size];
+	int count = 0;
+	for (int i : list) {
+	    resultArray[count++] = i;
+	}
+
+	for (int i = ZERO; i < size; i++) {
+	    Assert.assertEquals(resultArray[i], arr[i]);
+	}
+    }
+
+    @Test(dataProvider = "getClass")
+    public void shouldNotDoAnythingOnAnEmptyList(List<Integer> list) {
+
+	int result = ZERO;
+	for (int i : list) {
+	    result += i;
+	}
+
+	Assert.assertEquals(result, ZERO);
+
+    }
+}

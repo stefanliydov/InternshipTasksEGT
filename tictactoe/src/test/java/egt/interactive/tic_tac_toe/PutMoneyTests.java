@@ -1,0 +1,64 @@
+package egt.interactive.tic_tac_toe;
+
+import static egt.interactive.tic_tac_toe.resources.MyReflection.isStateCorrect;
+import static egt.interactive.tic_tac_toe.resources.RandomNumberGenerator.generate;
+import static org.testng.Assert.assertEquals;
+
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.arcade.BoardArcadeGame;
+import egt.interactive.tic_tac_toe.game.States;
+import egt.interactive.tic_tac_toe.resources.MyDataProvider;
+
+public class PutMoneyTests {
+
+    private static final int TARGET_MONEY = 10;
+
+    @DataProvider(name = "getGame")
+    public Object[][] getData() {
+	return MyDataProvider.getNewTicTacToeGame();
+    }
+
+    @Test(dataProvider = "getGame")
+    public void machineShouldAcceptMoneyAtStartAndNotReturnMoneyIfMoneyIsLessThanNeeded(final BoardArcadeGame game) {
+	assertEquals(game.putCoins(generate(1, 10)), 0);
+    }
+
+    @Test(dataProvider = "getGame")
+    public void machineShouldAcceptMoneyAtStartAndNotReturnMoneyIfMoneyIsExact(final BoardArcadeGame game) {
+	assertEquals(game.putCoins(TARGET_MONEY), 0);
+
+    }
+
+    @Test(dataProvider = "getGame")
+    public void machineShouldNotLetYouContinueUntilFullAmountIsEntered(final BoardArcadeGame game) {
+	final int amount = generate(1, 10);
+	game.putCoins(amount);
+
+	Assert.assertTrue(isStateCorrect(game, States.STAND_BY));
+	final int nextAmount = TARGET_MONEY - amount;
+	game.putCoins(nextAmount);
+
+	Assert.assertTrue(isStateCorrect(game, States.GAME_IN_PROGRESS));
+    }
+
+    @Test(dataProvider = "getGame")
+    public void machineShouldReturnExtraMoneyAndChangeState(final BoardArcadeGame game) {
+	final int amount = generate(11, 50);
+	final int expectedAmount = amount - TARGET_MONEY;
+
+	final int actualAmount = game.putCoins(amount);
+
+	assertEquals(actualAmount, expectedAmount);
+	Assert.assertTrue(isStateCorrect(game, States.GAME_IN_PROGRESS));
+    }
+
+    @Test(dataProvider = "getGame")
+    public void machineShouldNotAcceptMoneyAfterGameHasStarted(final BoardArcadeGame game) {
+	game.putCoins(TARGET_MONEY);
+	Assert.assertEquals(game.putCoins(TARGET_MONEY), TARGET_MONEY);
+    }
+
+}

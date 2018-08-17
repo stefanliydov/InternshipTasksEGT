@@ -1,0 +1,27 @@
+package egt.interactive.testing_framework.resources.test_ng;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+public class DataProviderCorrectnessTest extends BaseTest {
+
+    @Test(dataProvider = "getIntPrivate")
+    private void testProviderPrivate(final Integer integer) {
+	Assert.assertEquals(integer, Integer.valueOf(9));
+    }
+
+    @Test(dataProvider = "getIntPackage")
+     void testProviderPackage(final Integer integer) {
+	Assert.assertEquals(integer, Integer.valueOf(10));
+    }
+
+    @Test(dataProvider = "getIntProtected")
+    protected void testProviderProtected(final Integer integer) {
+	Assert.assertEquals(integer, Integer.valueOf(30));
+    }
+
+    @Test(dataProvider = "getIntPublic")
+    public void testProvider(final Integer integer) {
+	Assert.assertEquals(integer, Integer.valueOf(20));
+    }
+}

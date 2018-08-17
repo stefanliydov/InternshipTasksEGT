@@ -1,0 +1,98 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class RemoveTests {
+
+    private static final int ONE = 1;
+    private static final int ZERO = 0;
+
+    Map<Character, Integer> map;
+    private int size;
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(70, 150);
+    }
+
+    @BeforeMethod
+    public void mapReset() {
+	this.map = new MyMap<>();
+    }
+
+    @Test
+    public void removeShouldRemoveCorrectlyKeyAndValue() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.remove((char) i);
+	    final boolean keyResult = this.map.containsKey((char) i);
+	    final boolean valueResult = this.map.containsValue(i);
+	    Assert.assertFalse(keyResult);
+	    Assert.assertFalse(valueResult);
+	}
+	Assert.assertEquals(this.map.size(), ZERO);
+    }
+
+    @Test
+    public void removeShouldDecreaseSize() {
+
+    }
+
+    @Test
+    public void removeShouldWorkOnAFullMapWithChainedElements() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+
+	int mapSize = this.map.size();
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.remove((char) i);
+	    Assert.assertEquals(this.map.size(), --mapSize);
+	}
+    }
+
+    @Test
+    public void removeShouldReturnNullIfEntryIsNotPresent() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	final Integer result = this.map.get((char) (this.size + 1));
+	Assert.assertNull(result);
+    }
+
+    @Test
+    public void removeShouldNotDecreaseSizeIfEntryIsNotPresent() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+
+	final int secondSize = NumberGenerator.generate(200, 250);
+	final int mapSize = this.map.size();
+	for (int i = this.size; i < secondSize; i++) {
+	    this.map.remove((char) i);
+	    final int result = this.map.size();
+	    Assert.assertEquals(result, mapSize);
+	}
+    }
+
+    @Test
+    public void removeShouldReturnCorrectValue() {
+	for (int i = ONE; i <=this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+
+	//int mapSize = this.map.size();
+	for (int i = this.size; i >= ONE; i--) {
+	    final int result = this.map.remove((char) i);
+	    Assert.assertEquals(result, i);
+	}
+    }
+
+}

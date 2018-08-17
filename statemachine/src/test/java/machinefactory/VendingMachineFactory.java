@@ -1,0 +1,40 @@
+package machinefactory;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+import egt.interactive.statemachine.VendingMachine;
+import egt.interactive.writer.ConsoleWriter;
+import resources.MachineLoader;
+import resources.ProductNames;
+
+public class VendingMachineFactory {
+
+    public static VendingMachine createEmptyVendingMachine() {
+	return new VendingMachine(16, new ConsoleWriter());
+    }
+
+    public static VendingMachine createFullVendingMachine() {
+	VendingMachine machine = new VendingMachine(16, new ConsoleWriter());
+	MachineLoader.loadMachine(machine);
+	return machine;
+    }
+
+    public static VendingMachine createFullVendingMachineInService() {
+	VendingMachine machine = new VendingMachine(16, new ConsoleWriter());
+	MachineLoader.loadMachine(machine);
+	machine.service();
+	return machine;
+    }
+
+    public static VendingMachine createFullVendingMachineWithMoneyAndSelectedProduct() {
+	VendingMachine machine = new VendingMachine(16, new ConsoleWriter());
+	MachineLoader.loadMachine(machine);
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 1000));
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+	machine.selectItem(productName);
+
+	return machine;
+    }
+
+}

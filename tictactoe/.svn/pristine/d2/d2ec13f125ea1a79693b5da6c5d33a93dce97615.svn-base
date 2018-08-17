@@ -1,0 +1,8 @@
+package egt.interactive.tic_tac_toe.io;
+
+public interface IO {
+
+    public void write(String str);
+
+    public String read();
+}

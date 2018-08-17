@@ -1,0 +1,60 @@
+package egt.interactive.tic_tac_toe;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.connection.DBConnection;
+import egt.interactive.tic_tac_toe.player_points.PlayerPoints;
+import egt.interactive.tic_tac_toe.resources.DBQueryHelper;
+
+public class QueriesTests {
+
+    private final DBConnection connection = new DBConnection();
+    private final String EXISTING_PLAYER_NAME = "Dummy";
+    private final DBQueryHelper dbHelper = new DBQueryHelper();
+
+    @BeforeClass
+    public void addPlayersToDb() {
+	dbHelper.dropCreateTablesAndAddInfo();
+    }
+
+    @Test
+    public void doesPlayerExistShouldReturnTrueIfPlayerDoesNotExists() {
+	Assert.assertFalse(connection.doesPlayerExist(UUID.randomUUID().toString().substring(0, 30)));
+    }
+
+    @Test
+    public void doesPlayerExistShouldReturnTrueIfPlayerExists() {
+	Assert.assertTrue(connection.doesPlayerExist(EXISTING_PLAYER_NAME));
+    }
+
+    @Test
+    public void addPlayerShouldAddPlayer() {
+	final String name = UUID.randomUUID().toString().substring(0, 30);
+
+	Assert.assertFalse(connection.doesPlayerExist(name));
+	connection.addPlayer(name);
+	Assert.assertTrue(connection.doesPlayerExist(name));
+    }
+
+    @Test
+    public void topThreePlayersShouldReturnCorrectPlayers() {
+	final PlayerPoints[] expectedPlayers = new PlayerPoints[] { new PlayerPoints("Pesho19", "15"),
+		new PlayerPoints("Extreme971", "11"), new PlayerPoints("No_name", "5") };
+
+	List<PlayerPoints> topThreePlayers = connection.getTopThreePlayers();
+	for (int i = 0; i < expectedPlayers.length; i++) {
+	    final PlayerPoints actualPlayer = topThreePlayers.get(i);
+	    final PlayerPoints expectedPlayer = expectedPlayers[i];
+
+	    Assert.assertEquals(actualPlayer.getName(), expectedPlayer.getName());
+	    Assert.assertEquals(actualPlayer.getPoints(), expectedPlayer.getPoints());
+	}
+
+    }
+
+}

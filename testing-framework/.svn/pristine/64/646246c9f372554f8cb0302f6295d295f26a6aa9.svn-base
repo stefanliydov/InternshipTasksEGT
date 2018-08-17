@@ -1,0 +1,198 @@
+package egt.interactive.testing_framework.Test;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import egt.interactive.testing_framework.io.IO;
+
+public abstract class Test {
+    protected final Class<? extends Annotation> test;
+    protected final Class<? extends Annotation> beforeTest;
+    protected final Class<? extends Annotation> afterTest;
+    protected final Class<? extends Annotation> dataProvider;
+
+    public Test(final Class<? extends Annotation> test, final Class<? extends Annotation> beforeTest,
+	    final Class<? extends Annotation> afterTest, final Class<? extends Annotation> dataProvider) {
+	this.test = test;
+	this.beforeTest = beforeTest;
+	this.afterTest = afterTest;
+	this.dataProvider = dataProvider;
+    }
+
+    public Map<Class<?>, TestPackage> readMethodsFromClass(final String... classes) {
+	final Map<Class<?>, TestPackage> packages = new HashMap<>();
+	for (String className : classes) {
+	    final Class<?> clazz = getClassForName(className);
+	    final TestPackage testPackage = new TestPackage();
+	    final Method[] methods = getAllClassAndSuperClassMethods(clazz);
+
+	    for (Method method : methods) {
+		if (!method.isAccessible()) {
+		    method.setAccessible(true);
+		}
+		int annotationsCount = 0;
+		if (isAnnotationPresent(method, test)) {
+		    annotationsCount++;
+		    final Annotation annotation = method.getAnnotation(test);
+		    final String dataProvider = (String) getAnnotationValue(annotation, "dataProvider");
+		    @SuppressWarnings("unchecked")
+		    final Class<? extends Throwable>[] expectedExceptions = (Class<? extends Throwable>[]) getAnnotationValue(
+			    annotation, "expectedExceptions");
+		    TestMethod testMethod = new TestMethod(method, dataProvider, expectedExceptions);
+		    testPackage.addTestMethod(testMethod);
+		}
+		if (isAnnotationPresent(method, beforeTest)) {
+		    annotationsCount++;
+
+		    testPackage.addBeforeTestMethod(method);
+		}
+		if (isAnnotationPresent(method, afterTest)) {
+		    annotationsCount++;
+
+		    testPackage.addAfterTestMethod(method);
+		}
+		if (isAnnotationPresent(method, dataProvider)) {
+		    annotationsCount++;
+		    final Annotation annotation = method.getAnnotation(dataProvider);
+
+		    final String dataProviderName = (String) getAnnotationValue(annotation, "name");
+		    testPackage.addDataProviderMethod(dataProviderName, method);
+		}
+		areAnnotationsCorrect(annotationsCount, method);
+	    }
+	    packages.put(clazz, testPackage);
+	}
+	return packages;
+    }
+
+    public void runTests(final Object obj, final List<TestMethod> methods, final Map<String, Method> dataProviders,
+	    final IO io) {
+	for (TestMethod testMethod : methods) {
+
+	    final Class<? extends Throwable>[] expectedExceptions = testMethod.getExpectedException();
+	    final Method method = testMethod.getMethod();
+	    final String dataProvider = testMethod.getDataProvider();
+	    try {
+		if (!dataProvider.equals("")) {
+		    final Method dataProviderMethod = dataProviders.get(dataProvider);
+		    final Object[][] objects = (Object[][]) dataProviderMethod.invoke(obj);
+		    for (int j = 0; j < objects.length; j++) {
+			invokeTestMethod(obj, method, expectedExceptions, io, objects[j]);
+		    }
+
+		} else {
+		    invokeTestMethod(obj, method, expectedExceptions, io);
+		}
+	    } catch (AssertionError | Exception e) {
+		e.printStackTrace();
+		io.write(String.format("FAILED: %s()", method.getName()));
+	    }
+	}
+
+    }
+
+    protected void invokeTestMethod(final Object testClass, final Method method,
+	    final Class<? extends Throwable>[] expectedExceptions, final IO io, final Object... objects) {
+	try {
+	    method.invoke(testClass, objects);
+	    if (expectedExceptions.length > 0) {
+		throw new AssertionError("Expected exception was not thrown!");
+	    }
+
+	} catch (Exception e) {
+	    boolean found = false;
+	    for (Class<?> err : expectedExceptions) {
+		if (err.equals(e.getCause().getClass())) {
+		    found = true;
+		    break;
+		}
+	    }
+	    if (!found) {
+		throw new AssertionError(e.getCause());
+	    }
+	}
+	if (objects.length == 0) {
+	    io.write(String.format("PASSED: %s()", method.getName()));
+	} else {
+	    final String parameters = getParameters(objects);
+	    io.write(String.format("PASSED: %s(%s)", method.getName(), parameters));
+	}
+    }
+
+    public void runBeforeTests(final Object obj, final List<Method> methods) {
+	invokeMethods(obj, methods);
+    }
+
+    public void runAfterTests(final Object obj, final List<Method> methods) {
+	invokeMethods(obj, methods);
+    }
+
+    protected void invokeMethods(final Object obj, final List<Method> methods) {
+	for (Method method : methods) {
+	    try {
+		method.invoke(obj);
+	    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		throw new RuntimeException(e);
+	    }
+
+	}
+    }
+
+    protected boolean isAnnotationPresent(final Method method, final Class<? extends Annotation> annotation) {
+	if (Objects.isNull(annotation)) {
+	    return false;
+	}
+	return method.isAnnotationPresent(annotation);
+    }
+
+    protected void areAnnotationsCorrect(final int annotationsCounts, final Method method) {
+	if (annotationsCounts > 1) {
+	    throw new RuntimeException(method.getName() + " contains more than one test annotations");
+	}
+
+    }
+
+    protected Class<?> getClassForName(final String name) {
+	try {
+	    return Class.forName(name);
+	} catch (ClassNotFoundException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    protected Object getAnnotationValue(final Annotation annotation, final String methodName) {
+	final Class<? extends Annotation> annotationType = annotation.annotationType();
+	try {
+	    final Method targetMethod = annotationType.getMethod(methodName);
+	    return targetMethod.invoke(annotation);
+	} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+		| SecurityException e) {
+	    throw new RuntimeException(e);
+	}
+
+    }
+
+    protected String getParameters(final Object[] objects) {
+	return String.join(", ",
+		Arrays.stream(objects).map(x -> x.getClass().getCanonicalName()).collect(Collectors.toList()));
+    }
+
+    protected Method[] getAllClassAndSuperClassMethods(final Class<?> objectClass) {
+	final Set<Method> allMethods = new HashSet<>();
+	final Method[] declaredMethods = objectClass.getDeclaredMethods();
+	if (objectClass.getSuperclass() != null) {
+	    allMethods.addAll(Arrays.asList(getAllClassAndSuperClassMethods(objectClass.getSuperclass())));
+	}
+	allMethods.addAll(Arrays.asList(declaredMethods));
+	return allMethods.toArray(new Method[allMethods.size()]);
+    }
+}

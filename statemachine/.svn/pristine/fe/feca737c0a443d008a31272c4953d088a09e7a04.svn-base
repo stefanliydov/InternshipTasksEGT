@@ -1,0 +1,29 @@
+package statemachine;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+import resources.MachineLoader;
+
+public class PutCoinsTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+	MachineLoader.loadMachine(machine);
+    }
+
+    @Test
+    public void addCoinsShouldAddCoins() {
+	final Long amount = 525L;
+	machine.putCoins(amount);
+
+	final Long result = machine.getCoins();
+
+	Assert.assertEquals(result, amount);
+    }
+}

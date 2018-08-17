@@ -1,0 +1,20 @@
+package egt.interactive.testing_framework.resources.test_ng;
+
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+
+public class BaseTest {
+    
+    
+    protected int num;
+
+    @BeforeTest
+    public void changeNumValue() {
+	num = 5;
+    }
+    
+    @DataProvider(name = "geInt")
+    public Object[][] getInteger() {
+	return new Object[][] { { new Integer(5) } };
+    }
+}

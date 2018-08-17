@@ -1,0 +1,107 @@
+package egt.interactive.tic_tac_toe.states;
+
+import egt.interactive.tic_tac_toe.game.StateMachineGame;
+
+public enum States {
+
+    STAND_BY {
+	@Override
+	public boolean putCoins(final StateMachineGame game, final int coins) {
+	    if (!isMoneyValid(coins))
+		return false;
+	    game.insertCash(coins);
+	    if (game.isMoneyEnough()) {
+		game.setState(GAME_IN_PROGRESS);
+		game.beginGame();
+	    } else {
+		game.askForMoreMoney();
+	    }
+	    return true;
+	}
+
+	private boolean isMoneyValid(final int coins) {
+	    return coins > 0;
+	}
+
+	@Override
+	public boolean playMove(final StateMachineGame game, final int move) {
+
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(final StateMachineGame game) {
+	    return true;
+	}
+
+	@Override
+	public boolean endGame(final StateMachineGame game) {
+	    return false;
+	}
+    },
+    GAME_IN_PROGRESS {
+	@Override
+	public boolean putCoins(final StateMachineGame game, final int coins) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean playMove(final StateMachineGame game, final int move) {
+	    if (!isMoveValid(move) || !game.isFieldFree(move)) {
+		game.invalidField();
+		return false;
+	    }
+	    game.addPlayerMove(move);
+	    if (game.hasPlayerWon(move)) {
+		game.drawBoard();
+		finishGame(game);
+		return true;
+	    }
+
+	    if (game.isGameDraw()) {
+		game.drawBoard();
+		finishGame(game);
+		return true;
+	    }
+
+	    final int aIMove = game.addAIMove(move);
+	    game.drawBoard();
+	    if (game.isGameOver(move, aIMove)) {
+		finishGame(game);
+	    }
+
+	    return true;
+	}
+
+	private void finishGame(final StateMachineGame game) {
+	    game.getOutCome().finishGame(game);
+	}
+
+	private boolean isMoveValid(final int move) {
+	    return move >= 0 && move < 9;
+	}
+
+	@Override
+	public boolean returnMoney(final StateMachineGame game) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean endGame(final StateMachineGame game) {
+	    game.printTopThreePlayers();
+	    game.setState(STAND_BY);
+	    return true;
+	}
+    };
+
+    public abstract boolean putCoins(final StateMachineGame game, final int coins);
+
+    public abstract boolean playMove(final StateMachineGame game, final int move);
+
+    public abstract boolean returnMoney(final StateMachineGame game);
+
+    public abstract boolean endGame(final StateMachineGame game);
+
+}

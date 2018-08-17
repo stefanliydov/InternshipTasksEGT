@@ -1,0 +1,119 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+
+public class ComplexTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+    }
+
+    @Test
+    public void alotOfDifferentPurchasesShouldAddToMachineMoney()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	machine.putCoins("3");
+	machine.selectItem(1);
+	machine.takeItem();
+	machine.selectItem(1);
+	machine.takeItem();
+
+	Assert.assertTrue(machineIsInStandBy());
+
+	machine.putCoins("5");
+	machine.returnMoney();
+
+	Assert.assertTrue(machineIsInStandBy());
+
+	machine.putCoins("3");
+	machine.selectItem(6);
+	machine.takeItem();
+	machine.selectItem(6);
+	final BigDecimal coins = machine.returnMoney();
+
+	Assert.assertTrue(machineIsInStandBy());
+	Assert.assertEquals(coins.setScale(2, RoundingMode.HALF_EVEN),
+		new BigDecimal(0.30).setScale(2, RoundingMode.HALF_EVEN));
+
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("totalMoneyCollected");
+	field.setAccessible(true);
+	BigDecimal totalMoney = (BigDecimal) field.get(machine);
+
+	Assert.assertEquals(totalMoney.setScale(2, RoundingMode.HALF_EVEN),
+		new BigDecimal(5.70).setScale(2, RoundingMode.HALF_EVEN));
+
+    }
+
+    @Test
+    public void alotofDifferentOperationsAndThenErrorShouldStillHaveTotalMoney()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	machine.putCoins("3");
+	machine.selectItem(1);
+	machine.takeItem();
+	machine.selectItem(1);
+	machine.takeItem();
+
+	machine.putCoins("5");
+	machine.returnMoney();
+
+	machine.putCoins("3");
+	machine.selectItem(6);
+	machine.takeItem();
+	machine.putCoins("Invalid Money");
+
+	Assert.assertTrue(machine.service());
+
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("totalMoneyCollected");
+	field.setAccessible(true);
+	BigDecimal totalMoney = (BigDecimal) field.get(machine);
+
+	Assert.assertEquals(totalMoney.setScale(2, RoundingMode.HALF_EVEN),
+		new BigDecimal(5.70).setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+    
+    @Test
+    public void addingNewItemThenBuyingAllOfItShouldRemoveIt(){
+	VendingMachine machine = new VendingMachine();
+	String m = "3.00";
+	machine.addProduct("Milka", new BigDecimal(1.00), 1);
+	machine.putCoins(m);
+	machine.selectItem(2);
+	machine.takeItem();
+	machine.selectItem(1);
+	machine.returnMoney();
+	machine.takeItem();
+	machine.putCoins(m);
+	
+	Assert.assertTrue(machine.selectItem(7));
+	
+	
+	machine.takeItem();
+	machine.putCoins(m);
+	Assert.assertFalse(machine.selectItem(7));
+    }
+    
+    private boolean machineIsInStandBy()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	return state.equals(States.STAND_BY);
+    }
+
+}

@@ -1,0 +1,159 @@
+package com.egtinteractive.data_structures.list;
+
+import java.util.Iterator;
+
+public class ArrayList<T> implements List<T> {
+
+    private T[] arr;
+    private int size;
+
+    @SuppressWarnings("unchecked")
+    public ArrayList() {
+	this.arr = (T[]) new Object[2];
+	this.size = 0;
+    }
+
+    public T get(int index) {
+	if (index < 0 || index >= size) {
+	    throw new IndexOutOfBoundsException();
+	}
+	return this.arr[index];
+
+    }
+
+    public void add(T element) {
+	if (size == this.arr.length) {
+	    this.increasesize();
+	}
+	this.arr[size++] = element;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void increasesize() {
+	T[] newArr = (T[]) new Object[this.size * 2];
+
+	for (int i = 0; i < this.arr.length; i++) {
+	    newArr[i] = this.arr[i];
+	}
+	this.arr = newArr;
+    }
+
+    public void add(int index, T element) {
+	if (index < 0 || index >= size) {
+	    throw new IndexOutOfBoundsException();
+	}
+	if (size == this.arr.length) {
+	    this.increasesize();
+	}
+
+	if (size == this.arr.length) {
+	    this.increasesize();
+	}
+
+	for (int i = size-1; i > index; i++) {
+	    this.arr[i] = this.arr[i - 1];
+	}
+	this.arr[index] = element;
+	size++;
+    }
+
+    public void set(int index, T element) {
+	if (index < 0 || index >= size) {
+	    throw new IndexOutOfBoundsException();
+	}
+	this.arr[index] = element;
+
+    }
+
+    public boolean remove(T element) {
+
+	for (int i = 0; i < size; i++) {
+	    if (arr[i] == element) {
+
+		for (int j = i; j < size - 1; j++) {
+		    arr[j] = arr[j + 1];
+
+		}
+		size--;
+		if (size <= arr.length / 2) {
+		    this.reduceSize();
+		}
+		return true;
+
+	    }
+	}
+	return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void reduceSize() {
+	T[] newArr = (T[]) new Object[this.arr.length / 2];
+
+	for (int i = 0; i < size; i++) {
+	    newArr[i] = arr[i];
+	}
+	this.arr = newArr;
+    }
+
+    public boolean remove(int index) {
+	if (index < 0 || index >= size) {
+	    throw new IndexOutOfBoundsException();
+	}
+	for (int i = index; i < size - 1; i++) {
+	    arr[i] = arr[i + 1];
+
+	}
+	size--;
+
+	return true;
+    }
+
+    public boolean contains(Object O) {
+	for(int i = 0; i<size; i++){
+	    if(O == this.arr[i]){
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    public int indexOf(T element) {
+	for(int i = 0; i<size; i++){
+	    if(element == this.arr[i]){
+		return i;
+	    }
+	}
+	return -1;
+    }
+
+    public int size() {
+	return this.size;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void clear() {
+	this.arr = (T[]) new Object[this.arr.length];
+	this.size =0;
+
+    }
+
+    public Iterator<T> iterator() {
+	return new customIterator();
+    }
+    private class customIterator implements Iterator<T>{
+
+	private int i =0;
+	
+	@Override
+	public boolean hasNext() {
+	    	    return i<size;
+	}
+
+	@Override
+	public T next() {
+	    
+	    return arr[i++];
+	}
+	
+    }
+}

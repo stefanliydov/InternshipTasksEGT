@@ -1,0 +1,16 @@
+package resources;
+
+public enum ProductNames {
+    CROISSANT("Croissant"), COCACOLA("Coca-Cola"), KITKAT("Kit-Kat"), SPRITE("Sprite"), SNICKERS("Snickers"), CHIPS(
+	    "Chips"), GUMMYBEARS("Gummy Bears");
+
+    public String name;
+
+    ProductNames(String name) {
+	this.name = name;
+    }
+
+    public String getName() {
+	return this.name;
+    }
+}

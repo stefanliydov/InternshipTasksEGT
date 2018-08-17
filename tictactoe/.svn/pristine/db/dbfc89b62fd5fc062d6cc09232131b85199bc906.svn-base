@@ -1,0 +1,34 @@
+package egt.interactive.tic_tac_toe;
+
+import java.util.UUID;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.connection.ConnectionClass;
+
+public class QueriesTests {
+
+    private final ConnectionClass connection = new ConnectionClass();
+    private final String EXISTING_PLAYER_NAME = "Dummy";
+
+    @Test
+    public void doesPlayerExistShouldReturnTrueIfPlayerDoesNotExists() {
+	Assert.assertFalse(connection.doesPlayerExist(UUID.randomUUID().toString().substring(0, 30)));
+    }
+
+    @Test
+    public void doesPlayerExistShouldReturnTrueIfPlayerExists() {
+	Assert.assertTrue(connection.doesPlayerExist(EXISTING_PLAYER_NAME));
+    }
+
+    @Test
+    public void addPlayerShouldAddPlayer() {
+	final String name = UUID.randomUUID().toString().substring(0, 30);
+
+	Assert.assertFalse(connection.doesPlayerExist(name));
+	connection.addPlayer(name);
+	Assert.assertTrue(connection.doesPlayerExist(name));
+
+    }
+}

@@ -1,0 +1,45 @@
+package com.egtinteractive.data_structures.list;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.list.List;
+import com.egtinteractive.data_structures.resources.MyDataProvider;
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class SizeTests {
+
+    private static final int ZERO = 0;
+    private int size;
+
+    @DataProvider(name = "getClass")
+    public Object[][] getData() {
+	return MyDataProvider.getListDataProvider();
+    }
+
+    @BeforeTest
+    public void setSize() {
+	size = NumberGenerator.generate(2500, 5000);
+    }
+
+    @Test(dataProvider = "getClass")
+    public void sizeShouldReturnCorrectSize(List<Integer> list) {
+	for (int i = ZERO; i < size; i++) {
+	    list.add(i);
+	}
+
+	final int result = list.size();
+
+	Assert.assertEquals(result, this.size);
+
+    }
+
+    @Test(dataProvider = "getClass")
+    public void sizeOnAnEmptyListShouldReturnZero(List<Integer> list) {
+	final int result = list.size();
+	Assert.assertEquals(result, ZERO);
+    }
+}

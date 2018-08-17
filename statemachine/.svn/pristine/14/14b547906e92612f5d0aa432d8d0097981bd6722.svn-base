@@ -1,0 +1,31 @@
+package statemachine;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class PutCoinsTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+	MachineLoader.loadMachine(machine);
+    }
+
+    @Test
+    public void addCoinsShouldAddCoins() {
+	final BigDecimal amount = new BigDecimal(5.25);
+	machine.putCoins(amount.toPlainString());
+
+	final BigDecimal result = machine.getCoins();
+
+	Assert.assertEquals(result.setScale(2, RoundingMode.HALF_EVEN), amount.setScale(2, RoundingMode.HALF_EVEN));
+    }
+}

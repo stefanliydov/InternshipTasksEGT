@@ -1,0 +1,65 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+
+public class ServiceStateTests {
+
+    VendingMachine machine = new VendingMachine();
+
+    @BeforeMethod
+    public void addSomeCashInMachine() {
+	machine.service();
+
+    }
+
+    @Test
+    public void machineShouldNotAcceptCoins() {
+	Assert.assertFalse(machine.putCoins(1L) != null);
+    }
+
+    @Test
+    public void machineShouldNotSelectItem() {
+	Assert.assertFalse(machine.selectItem("Kit-Kat") != null);
+    }
+
+    @Test
+    public void machineShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldNotReturnMoney() {
+	Assert.assertNull(null);
+    }
+
+    @Test
+    public void machineShouldNotLetYouAddProductsWhileItsWorking() {
+	Assert.assertFalse(machine.addProduct("dummyProduct", 10L, 1));
+    }
+
+    @Test
+    public void machineShouldAcceptService() {
+	Assert.assertTrue(machine.service());
+    }
+
+    @Test
+    public void machineShouldGoBackToStandByAfterGettingServiced()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	Assert.assertTrue(machine.service());
+
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	Assert.assertEquals(state, States.STAND_BY);
+    }
+
+}

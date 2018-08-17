@@ -1,0 +1,46 @@
+package egt.interactive.tic_tac_toe.game;
+
+import egt.interactive.tic_tac_toe.ai_strategy.AiStrategy;
+import egt.interactive.tic_tac_toe.board.Board;
+import egt.interactive.tic_tac_toe.connection.DBQuieryExecutor;
+import egt.interactive.tic_tac_toe.drawer.BoardDrawer;
+import egt.interactive.tic_tac_toe.io.IO;
+
+interface GameMachine {
+
+    void insertCash(final int coins);
+
+    void setState(final States state);
+
+    IO getIO();
+
+    DBQuieryExecutor getConnection();
+
+    void setOutcome(final GameOutcome outcome);
+
+    States getState();
+
+    int getCoins();
+
+    Board getBoard();
+
+    GameOutcome getOutCome();
+
+    void takeMoney(final int money);
+
+    BoardDrawer getDrawer();
+
+    AiStrategy getAi();
+
+    String getPlayerSign();
+
+    String getAiSign();
+
+    String getInvalidMoveMessage();
+
+    String getDrawMessage();
+
+    String getAiVictoryMessage();
+
+    String getPlayerVictoryMessage();
+}

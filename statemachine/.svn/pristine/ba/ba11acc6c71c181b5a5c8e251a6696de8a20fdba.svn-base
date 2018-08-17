@@ -1,0 +1,70 @@
+package statemachine;
+
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import egt.interactive.writer.ConsoleWriter;
+import resources.MyReflection;
+import resources.ProductNames;
+
+public class StandByStateTests {
+    private static final int DEFAULT_MACHINE_SIZE = 16;
+    private static final String NAME = UUID.randomUUID().toString();
+    private VendingMachine machine;
+
+    @BeforeMethod
+    public void resetMachine() {
+	machine = new VendingMachine(DEFAULT_MACHINE_SIZE, new ConsoleWriter());
+
+    }
+
+    @Test
+    public void machineInStandByShouldNotReturnMoney() {
+	Assert.assertNull(machine.returnMoney());
+    }
+
+    @Test
+    public void machineInStandByShouldEnterServiceIfNeed() {
+	Assert.assertTrue(machine.service());
+    }
+
+    @Test
+    public void machineInStandByShouldNotSelectItem() {
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+	Assert.assertNull(machine.selectItem(productName));
+    }
+
+    @Test
+    public void machineInStandByShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineInStandByShouldTakeCoins() {
+	final long money = ThreadLocalRandom.current().nextLong(500, 1000);
+	Assert.assertEquals(machine.putCoins(money), money);
+    }
+
+    @Test
+    public void machineShouldNotAddNewItem() {
+
+	Assert.assertFalse(machine.addProduct(NAME, ThreadLocalRandom.current().nextLong(100, 150),
+		ThreadLocalRandom.current().nextInt(100, 150)));
+    }
+
+    @Test
+    public void machineInStandByShouldChangeStateAfterPutCoins() {
+
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 1000));
+
+	Assert.assertTrue(MyReflection.isStateCorrect(machine, States.SELECTING_ITEM));
+    }
+
+}

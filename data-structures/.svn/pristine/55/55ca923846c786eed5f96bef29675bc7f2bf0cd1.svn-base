@@ -1,0 +1,212 @@
+package com.egtinteractive.data_structures.map;
+
+import java.util.Iterator;
+import java.util.Objects;
+
+public class MyMap<K, V> implements Map<K, V> {
+
+    private static final int DEFAULT_SIZE = 16;
+    private static final float LOAD_FACTOR = 0.75F;
+    private Entry<K, V>[] buckets;
+    private Size size;
+    private CollisionSolvingStrategy strategy;
+
+    @SuppressWarnings("unchecked")
+    public MyMap() {
+	this.buckets = new Entry[DEFAULT_SIZE];
+	this.size = new Size();
+	this.strategy = CollisionSolvingStrategy.CHAINING;
+    }
+
+    @SuppressWarnings("unchecked")
+    public MyMap(CollisionStrategy strategy) {
+	this.buckets = new Entry[DEFAULT_SIZE];
+	this.size = new Size();
+	this.strategy = CollisionSolvingStrategy.valueOf(strategy.toString());
+    }
+
+    @Override
+    public V get(final K key) {
+	return this.strategy.get(key, buckets);
+    }
+
+    @Override
+    public V put(final K key, final V value) {
+	final double result = Double.valueOf(size.getSize()) / buckets.length;
+	if (result >= LOAD_FACTOR) {
+	    increaseSize();
+	}
+	return this.strategy.put(key, value, buckets, size);
+    }
+
+    @Override
+    public V remove(final K key) {
+	return this.strategy.remove(key, buckets, size);
+    }
+
+    @Override
+    public boolean containsKey(final K key) {
+	return this.strategy.containsKey(key, buckets);
+    }
+
+    @Override
+    public boolean containsValue(final V value) {
+	return this.strategy.containsValue(value, buckets);
+    }
+
+    @Override
+    public int size() {
+	return this.size.getSize();
+    }
+
+    @Override
+    public void clear() {
+	this.strategy.clear(buckets, size);
+	buckets = new Entry[DEFAULT_SIZE];
+    }
+
+    @Override
+    public Iterator<Entry<K, V>> iterator() {
+	return new CustomIterator();
+    }
+
+    private class CustomIterator implements Iterator<Entry<K, V>> {
+
+	private int i;
+	private int counter;
+	Entry<K, V> currEntry = null;
+
+	public CustomIterator() {
+	    i = 0;
+	    counter = 0;
+	}
+
+	@Override
+	public boolean hasNext() {
+	    return i < buckets.length && counter < size();
+	}
+
+	@Override
+	public Entry<K, V> next() {
+	    if (currEntry == null) {
+		while (buckets[i] == null && i < buckets.length - 1) {
+		    i++;
+		}
+	    }
+	    currEntry = buckets[i];
+	    Entry<K, V> temp = currEntry;
+	    currEntry = currEntry.next;
+	    counter++;
+	    return temp;
+	}
+
+    }
+
+    private void increaseSize() {
+	this.buckets = this.strategy.increaseSize(buckets);
+    }
+
+    static class Size {
+	private int value;
+
+	public Size() {
+	    this.value = 0;
+	}
+
+	public void incrementSize() {
+	    this.value++;
+	}
+
+	public void reduceSize() {
+	    this.value--;
+	}
+
+	public void resetSize() {
+	    this.value = 0;
+	}
+
+	public int getSize() {
+	    return this.value;
+	}
+
+    }
+
+    static class Entry<K, V> {
+
+	private Entry<K, V> next;
+	private K key;
+	private V value;
+
+	public Entry(K key, V value) {
+	    super();
+	    this.key = key;
+	    this.value = value;
+	}
+
+	public Entry<K, V> getNext() {
+	    return next;
+	}
+
+	public void setNext(Entry<K, V> next) {
+	    this.next = next;
+	}
+
+	public K getKey() {
+	    return key;
+	}
+
+	public V getValue() {
+	    return value;
+	}
+
+	public void setValue(final V value) {
+	    this.value = value;
+	}
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	if (o == this)
+	    return true;
+	if (!(o instanceof Map))
+	    return false;
+	int size = size();
+	if (size != ((Map<?, ?>) o).size())
+	    return false;
+
+	Iterator<Entry<K, V>> itr1 = iterator();
+	Iterator<Entry<?, ?>> itr2 = ((Map) o).iterator();
+
+	while (--size >= 0) {
+	    Entry<K, V> myCurrEntry = itr1.next();
+	    Entry<?, ?> otherCurrEntry = itr2.next();
+	    if (!Objects.equals(myCurrEntry.getKey(), otherCurrEntry.getKey())
+		    || !Objects.equals(myCurrEntry.getValue(), otherCurrEntry.getValue())) {
+		return false;
+
+	    }
+	}
+
+	return true;
+    }
+
+    public int hashCode() {
+	int hashCode = 1;
+	int size = buckets.length;
+	for (int i = 0; i < size; i++) {
+	    Entry<K, V> myCurrEntry = buckets[i];
+	    while (myCurrEntry != null) {
+		if (myCurrEntry.getValue() != null) {
+		    hashCode = 31 * hashCode
+			    + (myCurrEntry.getKey().hashCode() + myCurrEntry.getValue().hashCode() + size);
+		} else {
+		    hashCode = 31 * hashCode + myCurrEntry.getKey().hashCode() + size;
+		}
+		myCurrEntry = myCurrEntry.getNext();
+	    }
+	}
+	return hashCode;
+    }
+
+}

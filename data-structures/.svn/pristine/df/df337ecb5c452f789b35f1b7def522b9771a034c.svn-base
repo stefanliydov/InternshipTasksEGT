@@ -1,0 +1,54 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class SizeTests {
+
+    private static final int ONE = 1;
+    private static final int ZERO = 0;
+    Map<Character, Integer> map;
+    private int size;
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(70, 250);
+    }
+
+    @BeforeMethod
+    public void mapReset() {
+	this.map = new MyMap<>();
+    }
+
+    @Test
+    public void sizeShouldReturnCorrectSizeWithMultipleElements() {
+	for (int i = ONE; i <= this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	final int result = this.map.size();
+	Assert.assertEquals(result, this.size);
+    }
+
+    @Test
+    public void sizeShouldReturnZeroOnAnEmptyMap() {
+	final int result = this.map.size();
+	Assert.assertEquals(result, ZERO);
+    }
+
+    @Test
+    public void sizeShouldReturnCorrectSizeWithOneButHeavilyChainedElement() {
+	final int newSize = this.size * this.size;
+	int counter = ZERO;
+	for (int i = ONE; i < newSize; i += 16) {
+	    this.map.put((char) i, i);
+	    counter++;
+	}
+	final int result = this.map.size();
+	Assert.assertEquals(result, counter);
+    }
+
+}

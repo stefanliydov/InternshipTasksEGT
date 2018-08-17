@@ -1,0 +1,50 @@
+package egt.interactive.tic_tac_toe;
+
+import static egt.interactive.tic_tac_toe.resources.MyReflection.isStateCorrect;
+import static egt.interactive.tic_tac_toe.resources.RandomNumberGenerator.generate;
+import static org.testng.Assert.assertEquals;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.game.ArcadeGame;
+import egt.interactive.tic_tac_toe.game.TicTacToe;
+import egt.interactive.tic_tac_toe.states.States;
+
+public class ReturnMoneyTests {
+
+    private static final int TARGET_MONEY = 10;
+    private ArcadeGame game;
+
+    @BeforeMethod
+    public void createGame() {
+	game = new TicTacToe();
+    }
+
+    @Test
+    public void machineShouldReturnMoneyIfCustomersBacksOff() {
+	final int amount = generate(1, 9);
+
+	game.putCoins(amount);
+	final int actualAmount = game.returnMoney();
+	assertEquals(actualAmount, amount);
+	Assert.assertTrue(isStateCorrect(game, States.STAND_BY));
+
+    }
+
+    @Test
+    public void machineShouldNotReturnMoneyIfGameHasStarted() {
+	game.putCoins(TARGET_MONEY);
+	Assert.assertEquals(game.returnMoney(), 0);
+    }
+
+    @Test
+    public void machineShouldNotReturnMoneyAfterGameHasStartedEvenIfExtraMoneyIsPassed() {
+	final int amount = generate(20, 100);
+	final int extraMoneyReturned = game.putCoins(amount);
+	Assert.assertEquals(extraMoneyReturned, (amount - TARGET_MONEY));
+	Assert.assertEquals(game.returnMoney(), 0);
+    }
+
+}

@@ -1,0 +1,168 @@
+package com.egtinteractive.data_structures.tree;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.tree.BinaryTree;
+import com.egtinteractive.data_structures.tree.Tree;
+
+
+public class BinaryTreeTests {
+
+    Tree<Integer> tree;
+   
+
+    @BeforeMethod
+    public void resetTree() {
+	this.tree = new BinaryTree<>();
+    }
+
+    // Add Method Tests
+    @Test
+    public void addShouldAddElement() {
+	this.tree.add(1);
+	this.tree.add(2);
+	this.tree.add(3);
+
+	final int result = this.tree.size();
+	Assert.assertEquals(result, 3);
+    }
+
+    // Remove Method Tests
+    @Test
+    public void removeShouldRemoveCorrectItem() {
+	this.tree.add(1);
+	this.tree.add(5);
+	this.tree.add(8);
+	this.tree.remove(5);
+	Assert.assertEquals(tree.size(), 2);
+    }
+
+    @Test
+    public void removeShouldRemoveCorrectItemSecondTest() {
+	tree.add(1);
+	tree.add(5);
+	tree.add(8);
+	tree.remove(5);
+	final int result = tree.lower(6);
+	Assert.assertEquals(result, 1);
+    }
+
+    // Lower Method Tests
+    @Test
+    public void lowerShouldReturnCorrectElement() {
+	tree.add(1);
+	tree.add(3);
+	tree.add(5);
+
+	final int result = tree.lower(4);
+	Assert.assertEquals(result, 3);
+
+    }
+
+    @Test
+    public void lowerShouldReturnNullIfThereIsNoSuchElement() {
+	tree.add(7);
+	tree.add(3);
+	tree.add(5);
+
+	final Integer result = tree.lower(2);
+	Assert.assertEquals(result, null);
+
+    }
+
+    // Higher Method Tests
+    @Test
+    public void higherShouldReturnCorrectElement() {
+	tree.add(1);
+	tree.add(3);
+	tree.add(5);
+
+	final int result = tree.higher(2);
+	Assert.assertEquals(result, 3);
+
+    }
+
+    public void higherShouldReturnNullIfThereIsNoSuchElement() {
+	tree.add(7);
+	tree.add(3);
+	tree.add(5);
+
+	final Integer result = tree.higher(8);
+	Assert.assertEquals(result, null);
+
+    }
+
+    // pollFirst Method Tests
+    @Test
+    public void pollFirstShouldReturnLowestElement() {
+	tree.add(7);
+	tree.add(3);
+	tree.add(1);
+	tree.add(5);
+
+	final int result = tree.pollFirst();
+	Assert.assertEquals(result, 1);
+    }
+
+    @Test
+    public void pollFirstShouldReturnNullIf() {
+	final Integer result = tree.pollFirst();
+	Assert.assertEquals(result, null);
+    }
+
+    // pollLast Method Tests
+    @Test
+    public void pollLastShouldReturnLowestElement() {
+	tree.add(3);
+	tree.add(7);
+	tree.add(1);
+	tree.add(5);
+
+	final int result = tree.pollLast();
+	Assert.assertEquals(result, 7);
+    }
+
+    @Test
+    public void pollLastShouldReturnNullIf() {
+	final Integer result = tree.pollLast();
+	Assert.assertEquals(result, null);
+    }
+
+    // Size Method Tests
+    @Test
+    public void sizeShouldReturnCorrectSize() {
+	tree.add(3);
+	tree.add(7);
+	tree.add(1);
+	tree.add(9);
+	tree.add(6);
+	tree.add(2);
+
+	final int result = tree.size();
+	Assert.assertEquals(result, 6);
+
+    }
+
+    @Test
+    public void sizeOnAnEmptyTreeShoudlReturnZero() {
+
+	final int result = tree.size();
+	Assert.assertEquals(result, 0);
+
+    }
+
+    // Clear Method Tests
+    public void clearShouldRemoveEverything() {
+	tree.add(7);
+	tree.add(1);
+	tree.add(9);
+	tree.add(6);
+	tree.add(2);
+	tree.clear();
+
+	final int result = tree.size();
+	Assert.assertEquals(result, 0);
+    }
+}

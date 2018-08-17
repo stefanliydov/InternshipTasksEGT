@@ -1,0 +1,40 @@
+package egt.interactive.tic_tac_toe;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.game.ArcadeGame;
+import egt.interactive.tic_tac_toe.resources.RandomNumberGenerator;
+import egt.interactive.tic_tac_toe.resources.TicTacToeFactory;
+import egt.interactive.tic_tac_toe.states.States;
+
+public class EndGameTests {
+
+    private ArcadeGame game;
+
+    @BeforeClass
+    public void setAndPlayGame() {
+	this.game = TicTacToeFactory.createNewPaidTicTacToeGame();
+	while (game.getState() != States.END_GAME) {
+	    game.playMove(RandomNumberGenerator.generate(0, 9));
+	}
+
+    }
+
+    @Test
+    public void machineShouldNotReturnMoneyAtEndGame() {
+	Assert.assertEquals(game.returnMoney(), 0);
+    }
+
+    @Test
+    public void machineShouldNotPlayMove() {
+	Assert.assertFalse(game.playMove(RandomNumberGenerator.generate(0, 9)));
+    }
+
+    @Test
+    public void machineShouldNotAcceptCoinsAtEndGame() {
+	final int amount = RandomNumberGenerator.generate(0, 9);
+	Assert.assertEquals(game.putCoins(amount), amount);
+    }
+}

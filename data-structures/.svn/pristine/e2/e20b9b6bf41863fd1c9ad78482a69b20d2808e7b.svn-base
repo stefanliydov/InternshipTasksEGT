@@ -1,0 +1,53 @@
+package com.egtinteractive.data_structures.list;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class IndexOfTests {
+
+    private static final int ZERO = 0;
+    private int size;
+
+    @DataProvider(name = "getClass")
+    public Object[][] getData() {
+	return new Object[][] { { new ArrayList<>() }, { new LinkedList<>() } };
+    }
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(500, 1500);
+    }
+
+    @Test(dataProvider = "getClass")
+    public void indexOfShouldReturnCorrectIndex(List<Integer> list) {
+	
+	int counter = ZERO;
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(counter);
+
+	    final int result = list.indexOf(counter);
+	    Assert.assertEquals(result, i);
+	    counter += NumberGenerator.generate(5, 100);
+	}
+    }
+
+    @Test(dataProvider = "getClass")
+    public void indexOfOnAnEmptyListShouldReturnCorrect(List<Integer> list) {
+	final int result = list.indexOf(ZERO);
+	Assert.assertEquals(result, -1);
+    }
+
+    @Test(dataProvider = "getClass")
+    public void indexOfForANonExistingElementShouldReturnCorrentAnswer(List<Integer> list) {
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	final int result = list.indexOf(NumberGenerator.generate(1500, 30000));
+	Assert.assertEquals(result, -1);
+    }
+}

@@ -1,0 +1,30 @@
+package egt.interactive.statemachine;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+class Product {
+
+    private final String name;
+    private final BigDecimal price;
+
+    public Product(final String name, final BigDecimal price) {
+	this.name = name;
+	this.price = price;
+
+    }
+
+    public String getName() {
+	return this.name;
+    }
+
+    public BigDecimal getPrice() {
+	return this.price;
+    }
+
+    @Override
+    public String toString() {
+	return new StringBuilder().append(". Name: ").append(this.getName()).append(", price: ")
+		.append(this.getPrice().setScale(2, RoundingMode.HALF_EVEN)).append("$, quantity left: ").toString();
+    }
+}

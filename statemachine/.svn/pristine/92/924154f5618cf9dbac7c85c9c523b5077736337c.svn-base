@@ -1,0 +1,84 @@
+package statemachine;
+
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import resources.MyReflection;
+import resources.ProductNames;
+
+public class TakeItemStateTests {
+    private static final String NAME = UUID.randomUUID().toString();
+
+    @DataProvider(name = "getFullMachineWithMoneyAndSelectedProduct")
+    public Object[][] getData() {
+	return resources.MyDataProvider.getFullMachineWithMoneyAndSelectedProductDataProvider();
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineDoesEnterServiceIfNeededAndReturnsMoney(final VendingMachine machine) {
+	final long expectedMoney = machine.getCoins();
+	Assert.assertEquals(machine.service(), expectedMoney);
+	Assert.assertEquals(machine.service(), 0L);
+	final long result = machine.getCoins();
+	Assert.assertEquals(result, 0L);
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineDoesNotAcceptCoins(final VendingMachine machine) {
+	final long money = ThreadLocalRandom.current().nextLong(500, 1000);
+	final long expectedMoney = machine.getCoins();
+	Assert.assertEquals(machine.putCoins(money), expectedMoney);
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineDoesNotSelectItem(final VendingMachine machine) {
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+	Assert.assertNull(machine.selectItem(productName));
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineGivesCustomerItem(final VendingMachine machine) {
+	Assert.assertTrue(machine.takeItem());
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineShouldNotLetYouAddProductsWhileItsWorking(final VendingMachine machine) {
+	Assert.assertFalse(machine.addProduct(NAME, ThreadLocalRandom.current().nextLong(10, 15),
+		ThreadLocalRandom.current().nextInt(2, 5)));
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineDoesNotGiveMoneyBack(final VendingMachine machine) {
+	Assert.assertNull(machine.returnMoney());
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineGoesBackToSelectingStateIfThereAreMoneyLeftAfterTakingItem(final VendingMachine machine) {
+	machine.takeItem();
+	Assert.assertTrue(MyReflection.isStateCorrect(machine, States.SELECTING_ITEM));
+    }
+
+    @Test(dataProvider = "getFullMachineWithMoneyAndSelectedProduct")
+    public void machineChangesStateToStandByIfMoneyIsZeroAfterTakingItem(final VendingMachine machine) {
+	machine.takeItem();
+	machine.returnMoney();
+	final long cost = ThreadLocalRandom.current().nextLong(500, 1000);
+	machine.service();
+	machine.addProduct(NAME, cost, 1);
+	machine.service();
+	machine.putCoins(cost);
+
+	machine.selectItem(NAME);
+	Assert.assertTrue(machine.takeItem());
+
+	Assert.assertTrue(MyReflection.isStateCorrect(machine, States.STAND_BY));
+    }
+
+}

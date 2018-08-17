@@ -1,0 +1,286 @@
+package com.egtinteractive.enums;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.google.common.base.Defaults;
+
+public enum Format {
+
+    JSON {
+
+	@Override
+	public String serialize(final Object obj) {
+	    List<Field> declaredFields = Arrays.asList(obj.getClass().getDeclaredFields()).stream()
+		    .filter(x -> !x.getName().equals("this$0")).collect(Collectors.toList());
+	    final StringBuilder sb = new StringBuilder();
+	    sb.append("{").append(System.lineSeparator());
+	    for (int i = 0; i < declaredFields.size(); i++) {
+		final Field field = declaredFields.get(i);
+		field.setAccessible(true);
+		final String fieldName = field.getName();
+		sb.append("\"").append(fieldName).append("\":");
+		final Object value = getFieldValue(obj, field);
+		sb.append(getFormatValueRepresentation(value));
+		if (i < declaredFields.size() - 1) {
+		    sb.append(",").append(System.lineSeparator());
+		}
+	    }
+	    sb.append(System.lineSeparator()).append("}");
+	    return sb.toString();
+	}
+
+	private String getFormatValueRepresentation(final Object value) {
+	    if (value == null) {
+		return null;
+	    }
+	    final Class<?> type = value.getClass();
+	    if (type.isPrimitive() || value instanceof Number || type == Boolean.class || type == Character.class) {
+		if (type == char.class || type == Character.class) {
+		    return "'" + value + "'";
+		}
+		return String.valueOf(value);
+	    } else if (type == String.class) {
+		return "\"" + value + "\"";
+	    } else if (value instanceof Collection) {
+		final Collection<?> collection = (Collection<?>) value;
+		final List<String> elements = new LinkedList<>();
+		for (Object collectionObject : collection) {
+		    elements.add(getFormatValueRepresentation(collectionObject));
+		}
+		return "[" + String.join(", ", elements) + "]";
+
+	    } else if (type.isArray()) {	
+		final Object[] objs = getArray(value);
+		final List<String> elements = new LinkedList<>();
+		for (Object collectionObject : objs) {
+		    elements.add(getFormatValueRepresentation(collectionObject));
+		}
+		return "[" + String.join(", ", elements) + "]";
+	    } else {
+		return this.serialize(value);
+	    }
+	}
+
+	@Override
+	public Object deserialize(final String str, final Class<?> objClass) {
+	    final Constructor<?> constr = objClass.getDeclaredConstructors()[0];
+	    final Parameter[] constructorParams = constr.getParameters();
+	    final Field[] declaredFields = objClass.getDeclaredFields();
+	    final String numRegex = "\"%s\":((\\d+(\\.\\d+)?))|(null)";
+	    final String stringRegex = "\"%s\":\".*?\"";
+	    final Object[] constructorDefaultValues = getConstructorDefaultValues(constructorParams);
+	    Object obj = getObjectInstance(constr, constructorDefaultValues);
+	    for (final Field field : declaredFields) {
+		//final Object value = getValue(field, str, obj);
+		Pattern pattern = Pattern.compile(String.format(stringRegex, field.getName()));
+		Matcher matcher = pattern.matcher(str);
+		if(matcher.find()){
+		    System.out.println(matcher.group());
+		}
+
+		field.setAccessible(true);
+		//setObjectValue(field, obj, value);
+	    }
+
+	    return obj;
+	}
+
+	private Object getValue(Field field, String str, Object obj) {
+	    JSONObject jo = getJsonObj(str);
+	    final Object rawTypeValue = jo.get(field.getName());
+	    final Object rawType = rawTypeValue.getClass();
+	    final Object value;
+	    final Class<?> type = field.getType();
+	    if (rawType == JSONArray.class) {
+		if (type.isArray()) {
+		    JSONArray jsonArray = (JSONArray) rawTypeValue;
+		    Object[] arr = new Object[jsonArray.size()];
+		    if (jsonArray != null) {
+			int len = jsonArray.size();
+			for (int i = 0; i < len; i++) {
+			    arr[i] = (jsonArray.get(i).toString());
+			}
+		    }
+
+		    value = arr;
+
+		} else {
+		    Collection<Object> list = new ArrayList<>();
+		    JSONArray jsonArray = (JSONArray) rawTypeValue;
+		    if (jsonArray != null) {
+			int len = jsonArray.size();
+			for (int i = 0; i < len; i++) {
+			    list.add(jsonArray.get(i).toString());
+			}
+		    }
+
+		    value = list;
+		}
+	    } else if (rawType == JSONObject.class) {
+		value = this.deserialize(String.valueOf(rawTypeValue), type);
+	    } else {
+		value = getValue(String.valueOf(rawTypeValue), type);
+	    }
+
+	    return value;
+	}
+
+	private Object getValue(String rawTypeValue, Class<?> type) {
+	    if (type == boolean.class || type == Boolean.class) {
+		return Boolean.valueOf(rawTypeValue);
+	    } else if (type == byte.class || type == Byte.class) {
+		return Byte.valueOf(rawTypeValue);
+	    } else if (type == short.class || type == Short.class) {
+		return Short.valueOf(rawTypeValue);
+	    } else if (type == int.class || type == Integer.class) {
+		return Integer.valueOf(rawTypeValue);
+	    } else if (type == long.class || type == Long.class) {
+		return Long.valueOf(rawTypeValue);
+	    } else if (type == double.class || type == Double.class) {
+		return Double.valueOf(rawTypeValue);
+	    } else if (type == float.class || type == Float.class) {
+		return Float.valueOf(rawTypeValue);
+	    } else if (type == char.class || type == Character.class) {
+		if (rawTypeValue.length() > 1) {
+		    throw new RuntimeException("Was passed string, expected char");
+		}
+		return rawTypeValue.charAt(0);
+	    } else if (type == String.class) {
+		return rawTypeValue;
+	    }
+
+	    return null;
+	}
+
+	private JSONObject getJsonObj(String str) {
+	    try {
+		return (JSONObject) new JSONParser().parse(str);
+	    } catch (ParseException e) {
+		throw new RuntimeException(e);
+	    }
+	}
+
+	private Object[] getConstructorDefaultValues(final Parameter[] constructorParams) {
+	    return Arrays.stream(constructorParams).map(x -> Defaults.defaultValue(x.getType())).toArray();
+	}
+
+	private Object getObjectInstance(Constructor<?> constr, Object[] constructorDefaultValues) {
+	    try {
+		return constr.newInstance(constructorDefaultValues);
+	    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+		    | InvocationTargetException e) {
+		throw new RuntimeException(e);
+	    }
+	}
+
+	private void setObjectValue(Field field, Object obj, Object value) {
+	    try {
+		field.set(obj, value);
+	    } catch (IllegalArgumentException | IllegalAccessException e) {
+		// TODO Auto-generated catch block
+		throw new RuntimeException(e);
+	    }
+
+	}
+    },
+    XML
+
+    {
+
+	@Override
+	public String serialize(final Object obj) {
+	    List<Field> declaredFields = Arrays.asList(obj.getClass().getDeclaredFields()).stream()
+		    .filter(x -> !x.getName().equals("this$0")).collect(Collectors.toList());
+	    final StringBuilder sb = new StringBuilder();
+	    sb.append("<").append(obj.getClass().getName()).append(">").append(System.lineSeparator());
+
+	    for (Field field : declaredFields) {
+		field.setAccessible(true);
+		final String fieldName = field.getName();
+		final Object value = getFieldValue(obj, field);
+		sb.append(getFormatValueRepresentation(value, fieldName)).append(System.lineSeparator());
+
+	    }
+	    sb.append("</").append(obj.getClass().getName()).append(">");
+	    return sb.toString();
+	}
+
+	private String getFormatValueRepresentation(final Object value, final String fieldName) {
+	    if (value == null) {
+		return "<" + fieldName + ">" + null + "</" + fieldName + ">";
+	    }
+	    final Class<?> type = value.getClass();
+	    if (value.getClass().isPrimitive() || value instanceof Number || value.getClass() == Boolean.class
+		    || value.getClass() == Character.class || value.getClass() == String.class) {
+		return "<" + fieldName + ">" + value + "</" + fieldName + ">";
+	    } else if (value instanceof Collection) {
+		final Collection<?> collection = (Collection<?>) value;
+		final StringBuilder sb = new StringBuilder();
+		for (Object collectionObject : collection) {
+		    final String simpleName = collectionObject.getClass().getSimpleName();
+		    sb.append(getFormatValueRepresentation(collectionObject, simpleName))
+			    .append(System.lineSeparator());
+		}
+		return "<" + fieldName + ">" + System.lineSeparator() + sb.toString() + "</" + fieldName + ">";
+
+	    } else if (type.isArray()) {
+		final Object[] objs = getArray(value);
+		final StringBuilder sb = new StringBuilder();
+		for (Object collectionObject : objs) {
+		    final String simpleName = collectionObject.getClass().getSimpleName();
+		    sb.append(getFormatValueRepresentation(collectionObject, simpleName))
+			    .append(System.lineSeparator());
+		}
+		return "<" + fieldName + ">" + System.lineSeparator() + sb.toString() + "</" + fieldName + ">";
+	    } else {
+		return this.serialize(value);
+	    }
+	}
+
+	@Override
+	public Object deserialize(final String str, final Class<?> objClass) {
+	    // TODO Auto-generated method stub
+	    return null;
+	}
+
+    };
+
+    public abstract String serialize(final Object obj);
+
+    public abstract Object deserialize(final String str, final Class<?> objClass);
+
+    protected Object getFieldValue(final Object obj, final Field field) {
+	try {
+	    return field.get(obj);
+	} catch (IllegalArgumentException | IllegalAccessException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    protected Object[] getArray(final Object val) {
+	final int arrlength = Array.getLength(val);
+	final Object[] outputArray = new Object[arrlength];
+	for (int i = 0; i < arrlength; ++i) {
+	    outputArray[i] = Array.get(val, i);
+	}
+	return outputArray;
+    }
+
+}

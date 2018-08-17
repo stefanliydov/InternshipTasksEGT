@@ -1,0 +1,271 @@
+package com.egtinteractive.data_structures;
+
+import org.testng.annotations.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+
+import com.egtinteractive.data_structures.list.ArrayList;
+import com.egtinteractive.data_structures.list.List;
+
+import junit.framework.TestCase;
+
+public class ArrayListTests extends TestCase {
+
+    private List<Integer> list = new ArrayList<>();
+
+    @BeforeMethod
+    public void resetList() {
+	this.list = new ArrayList<>();
+    }
+
+    // Get Method Tests
+    @Test
+    public void getShouldReturnCorrectElement() {
+	this.list.add(5);
+	this.list.add(3);
+	this.list.add(2);
+
+	final int result = this.list.get(1);
+	Assert.assertEquals(result, 3);
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void getWithAnIndexLargerThatsSizeShouldThrowException() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.get(10);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void getiWithANegativeIndexShouldThrowException() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.get(-1);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void getShouldThrowExcpetionIfListIsEmpty() {
+	this.list.get(1);
+
+    }
+
+    // Add Method Tests
+    @Test
+    public void addShouldAddElementAtTheEnd() {
+	this.list.add(3);
+	this.list.add(4);
+	this.list.add(5);
+
+	final int result = this.list.get(2);
+	Assert.assertEquals(result, 5);
+
+    }
+
+    @Test
+    public void addAtSpecificIndexShouldAddCorrectly() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(3);
+	this.list.add(4);
+	this.list.add(6);
+
+	this.list.add(4, 5);
+
+	final int result = this.list.get(4);
+	Assert.assertEquals(result, 5);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void addWithAnIndexLargerThanSizeShouldThrowException() {
+	this.list.add(4);
+	this.list.add(6);
+
+	this.list.add(7, 5);
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void addWithANegativeIndexShouldThrowException() {
+	this.list.add(4);
+	this.list.add(6);
+
+	this.list.add(-1, 5);
+    }
+
+    // Set Method Tests
+    @Test
+    public void setShouldOverwriteCorrectly() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(3);
+	this.list.add(4);
+	this.list.add(5);
+
+	this.list.set(3, 6);
+	final int result = this.list.get(3);
+	Assert.assertEquals(result, 6);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void setWithIndexLargerThanSizeShouldThrowException() {
+	this.list.add(2);
+
+	this.list.set(5, 3);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void setWithNegativeIndexShouldThrowExcpetion() {
+	this.list.add(2);
+
+	this.list.set(-1, 3);
+
+    }
+
+    // Remove Method Tests
+    @Test
+    public void removeShouldRemoveAtCorrectIndex() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(3);
+	this.list.add(4);
+
+	final boolean result = this.list.remove(2);
+	Assert.assertTrue(result);
+
+	String elementsLeft = "";
+
+	for (int element : this.list) {
+	    elementsLeft += String.valueOf(element);
+	}
+
+	Assert.assertEquals(elementsLeft, "124");
+
+    }
+
+    @Test
+    public void RemoveShouldRemoveCorrectElement() {
+	final List<String> stringList = new ArrayList<>();
+	stringList.add("a");
+	stringList.add("b");
+	stringList.add("c");
+	stringList.add("d");
+
+	final boolean result = stringList.remove("c");
+	Assert.assertTrue(result);
+
+	String elementsLeft = "";
+
+	for (String element : stringList) {
+	    elementsLeft += element;
+	}
+
+	Assert.assertEquals(elementsLeft, "abd");
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void removeWithIndexLargerThanSizeShouldThrowException() {
+	this.list.add(1);
+	this.list.add(3);
+	this.list.remove(10);
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    public void removeWithNegativeIndexShouldThrowException() {
+	this.list.add(1);
+	this.list.add(3);
+	this.list.remove(-2);
+    }
+
+    // Contains Method Tests
+    @Test
+    public void containsShouldReturnTrueIfContains() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(3);
+
+	final boolean result = this.list.contains(2);
+	Assert.assertTrue(result);
+
+    }
+
+    @Test
+    public void containsShouldReturnFalseIfNotContains() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(3);
+
+	final boolean result = this.list.contains(4);
+	Assert.assertFalse(result);
+    }
+
+    // IndexOf Method Tests
+    @Test
+    public void indexOfShouldReturnCorrectIndex() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(3);
+
+	final int result = this.list.indexOf(2);
+	Assert.assertEquals(result, 1);
+    }
+
+    @Test
+    public void indexOfOnAnEmptyListShourReturnCorrect() {
+	final int result = this.list.indexOf(1);
+	Assert.assertEquals(result, -1);
+    }
+
+    @Test
+    public void indexOfForANonExistingElementShouldReturnCorrentAnswer() {
+	this.list.add(1);
+	this.list.add(2);
+
+	final int result = this.list.indexOf(5);
+	Assert.assertEquals(result, -1);
+    }
+
+    // Size Method Tests
+    @Test
+    public void sizeShouldReturnCorrentSize() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(9);
+	this.list.add(7);
+	this.list.add(6);
+	this.list.add(-1);
+
+	final int result = this.list.size();
+
+	Assert.assertEquals(result, 6);
+
+    }
+
+    @Test
+    public void sizeOnAnEmptyListShouldReturnZero() {
+	final int result = this.list.size();
+	Assert.assertEquals(result, 0);
+    }
+
+    // Clear Method Tests
+    @Test
+    public void clearShouldRemoveAllElements() {
+	this.list.add(1);
+	this.list.add(2);
+	this.list.add(9);
+	this.list.add(7);
+	this.list.add(6);
+	this.list.add(-1);
+
+	this.list.clear();
+
+	final int result = this.list.size();
+
+	Assert.assertEquals(result, 0);
+
+    }
+
+}

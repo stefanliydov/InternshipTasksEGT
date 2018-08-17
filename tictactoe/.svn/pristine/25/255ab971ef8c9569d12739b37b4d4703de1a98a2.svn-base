@@ -1,0 +1,50 @@
+package egt.interactive.tic_tac_toe.game;
+
+import egt.interactive.tic_tac_toe.io.IO;
+import egt.interactive.tic_tac_toe.states.GameOutcome;
+import egt.interactive.tic_tac_toe.states.States;
+
+public abstract class StateMachineGame implements ArcadeGame {
+
+    public abstract void insertCash(final int coins);
+
+    public abstract boolean isMoneyEnough();
+
+    public abstract void setState(final States state);
+
+    public abstract void beginGame();
+
+    public abstract void askForMoreMoney();
+
+    public abstract boolean isFieldFree(final int move);
+
+    public abstract void invalidField();
+
+    public abstract void drawBoard();
+
+    public abstract boolean isGameOver(final int move, final int aiMove);
+
+    public abstract IO getIO();
+
+    public abstract void printPlayerVictoryMessage();
+
+    public abstract void printIOVictoryMessage();
+
+    public abstract void printDrawMessage();
+
+    public abstract boolean hasPlayerWon(final int move);
+
+    public abstract void addPlayerMove(final int move);
+
+    public abstract int addAIMove(final int move);
+
+    public abstract boolean isGameDraw();
+
+    public abstract void addGameWithNoPlayer();
+
+    public abstract void addGameWithPlayer(final String playerName);
+
+    public abstract void printTopThreePlayers();
+
+    public abstract void setOutcome(final GameOutcome outcome);
+}

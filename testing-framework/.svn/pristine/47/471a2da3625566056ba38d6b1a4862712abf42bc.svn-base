@@ -1,0 +1,131 @@
+package egt.interactive.testing_framework;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import egt.interactive.testing_framework.resources.MyDataProvider;
+import egt.interactive.testing_framework.resources.TestingIO;
+import egt.interactive.testing_framework.resources.test_ng.BeforeTestExecutionTest;
+import egt.interactive.testing_framework.resources.test_ng.CorrectnessTest;
+import egt.interactive.testing_framework.resources.test_ng.DataProviderCorrectnessTest;
+import egt.interactive.testing_framework.resources.test_ng.ExpectedExceptionNotFoundTest;
+import egt.interactive.testing_framework.resources.test_ng.ExpectedExceptionTests;
+import egt.interactive.testing_framework.resources.test_ng.IncorrectTest;
+import egt.interactive.testing_framework.resources.test_ng.MultipleAssertsTests;
+import egt.interactive.testing_framework.resources.test_ng.UnexpectedExceptionTest;
+
+public class TestNGTests {
+
+    private final TestingIO io = new TestingIO();
+
+    @DataProvider(name = "claimer")
+    public Object[][] getClaimer() {
+	return MyDataProvider.getMethodsClaimerTestng(io);
+    }
+
+    @Test(dataProvider = "claimer")
+    public void correctTestShouldPass(final MethodsClaimer claimer) {
+	final List<String> classes = new ArrayList<>();
+	classes.add(CorrectnessTest.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertTrue(io.map.get("testThatPasses"));
+
+    }
+
+    @Test(dataProvider = "claimer")
+    public void dataProvidersShouldPassParameters(final MethodsClaimer claimer) {
+	final List<String> classes = new ArrayList<>();
+	classes.add(DataProviderCorrectnessTest.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertTrue(io.map.get("testProvider"));
+
+    }
+
+    @Test(dataProvider = "claimer")
+    public void incorrectTestShouldntPass(final MethodsClaimer claimer) {
+	final List<String> classes = new ArrayList<>();
+	classes.add(IncorrectTest.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertFalse(io.map.get("incorrectTest"));
+
+    }
+
+    @Test(dataProvider = "claimer")
+    public void shouldCatchCorrectErrorThrown(final MethodsClaimer claimer) {
+	final List<String> classes = new ArrayList<>();
+	classes.add(ExpectedExceptionTests.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertTrue(io.map.get("shouldPassIfRightMistakeIsThrown"));
+
+    }
+
+    @Test(dataProvider = "claimer")
+    public void shouldNotCatchWrongError(final MethodsClaimer claimer) {
+	final List<String> classes = new ArrayList<>();
+	classes.add(UnexpectedExceptionTest.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertFalse(io.map.get("throwWrongException"));
+    }
+
+    @Test(dataProvider = "claimer")
+    public void beforeTestShouldBeExecuted(final MethodsClaimer claimer) {
+	final List<String> classes = new ArrayList<>();
+	classes.add(BeforeTestExecutionTest.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertTrue(io.map.get("numShouldBeFive"));
+    }
+
+    @Test(dataProvider = "claimer")
+    public void shouldGiveWrongAnswerIfNoErrorIsThrown(final MethodsClaimer claimer) {
+	final List<String> classes = new ArrayList<>();
+	classes.add(ExpectedExceptionNotFoundTest.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertFalse(io.map.get("shouldGiveWrongAnswerIfNoErrorIsThrown"));
+
+    }
+
+    @Test(dataProvider = "claimer")
+    public void multipleAssertsWithOneBeingWrongShouldReturnFailed(final MethodsClaimer claimer) {
+	List<String> classes = new ArrayList<>();
+	classes.add(MultipleAssertsTests.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertFalse(io.map.get("multipleAssertThenOneWrongShouldGiveFalse"));
+
+    }
+
+    @Test(dataProvider = "claimer")
+    public void multipleClassesLoadedShouldHaveTestsRunCorrectly(final MethodsClaimer claimer) {
+	io.map = new HashMap<>();
+	List<String> classes = new ArrayList<>();
+	classes.add(MultipleAssertsTests.class.getName());
+	classes.add(ExpectedExceptionNotFoundTest.class.getName());
+	classes.add(BeforeTestExecutionTest.class.getName());
+	classes.add(CorrectnessTest.class.getName());
+	classes.add(ExpectedExceptionTests.class.getName());
+	claimer.loadClasses(classes);
+	claimer.run();
+	Assert.assertFalse(io.map.get("multipleAssertThenOneWrongShouldGiveFalse"));
+	Assert.assertFalse(io.map.get("multipleAssertThenOneWrongShouldGiveFalse"));
+	Assert.assertFalse(io.map.get("shouldGiveWrongAnswerIfNoErrorIsThrown"));
+	Assert.assertTrue(io.map.get("numShouldBeFive"));
+	Assert.assertTrue(io.map.get("shouldPassIfRightMistakeIsThrown"));
+	io.map = new HashMap<>();
+    }
+
+    
+
+}

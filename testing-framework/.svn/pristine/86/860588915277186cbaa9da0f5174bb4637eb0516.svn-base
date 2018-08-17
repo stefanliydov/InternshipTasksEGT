@@ -1,0 +1,42 @@
+<h2>Methods run, sorted chronologically</h2><h3>&gt;&gt; means before, &lt;&lt; means after</h3><p/><br/><em>Default suite</em><p/><small><i>(Hover the method name to see the test class name)</i></small><p/>
+<table border="1">
+<tr><th>Time</th><th>Delta (ms)</th><th>Suite<br>configuration</th><th>Test<br>configuration</th><th>Class<br>configuration</th><th>Groups<br>configuration</th><th>Method<br>configuration</th><th>Test<br>method</th><th>Thread</th><th>Instances</th></tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>0</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.beforeTestShouldBeExecuted(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">beforeTestShouldBeExecuted</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>79</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.beforeTestShouldBeExecuted(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">beforeTestShouldBeExecuted</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>10</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.correctTestShouldPass(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">correctTestShouldPass</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>82</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.correctTestShouldPass(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">correctTestShouldPass</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>12</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.dataProvidersShouldPassParameters(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">dataProvidersShouldPassParameters</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>84</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.dataProvidersShouldPassParameters(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">dataProvidersShouldPassParameters</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>51</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.incorrectTestShouldntPass(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">incorrectTestShouldntPass</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>86</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.incorrectTestShouldntPass(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">incorrectTestShouldntPass</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>55</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.multipleAssertsWithOneBeingWrongShouldReturnFailed(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">multipleAssertsWithOneBeingWrongShouldReturnFailed</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>88</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.multipleAssertsWithOneBeingWrongShouldReturnFailed(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">multipleAssertsWithOneBeingWrongShouldReturnFailed</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>57</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.multipleClassesLoadedShouldHaveTestsRunCorrectly(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">multipleClassesLoadedShouldHaveTestsRunCorrectly</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>91</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.multipleClassesLoadedShouldHaveTestsRunCorrectly(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">multipleClassesLoadedShouldHaveTestsRunCorrectly</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="b7f5ae">  <td>18/08/08 10:36:03</td>   <td>76</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="ExceptionTests.runWithoutFirstLoadingClassesShouldThrowException(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.ExceptionTests@58651fd0]">runWithoutFirstLoadingClassesShouldThrowException</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>61</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.shouldCatchCorrectErrorThrown(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">shouldCatchCorrectErrorThrown</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>94</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.shouldCatchCorrectErrorThrown(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">shouldCatchCorrectErrorThrown</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>62</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.shouldGiveWrongAnswerIfNoErrorIsThrown(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">shouldGiveWrongAnswerIfNoErrorIsThrown</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>95</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.shouldGiveWrongAnswerIfNoErrorIsThrown(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">shouldGiveWrongAnswerIfNoErrorIsThrown</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="7471b5">  <td>18/08/08 10:36:03</td>   <td>64</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="TestNGTests.shouldNotCatchWrongError(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.TestNGTests@9629756]">shouldNotCatchWrongError</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+<tr bgcolor="6f6bfd">  <td>18/08/08 10:36:03</td>   <td>97</td> <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td title="CustomAnnotationsTests.shouldNotCatchWrongError(egt.interactive.testing_framework.MethodsClaimer)[pri:0, instance:egt.interactive.testing_framework.CustomAnnotationsTests@4520ebad]">shouldNotCatchWrongError</td> 
+  <td>main@597255128</td>   <td></td> </tr>
+</table>

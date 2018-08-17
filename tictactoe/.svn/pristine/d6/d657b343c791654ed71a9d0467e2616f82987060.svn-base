@@ -1,0 +1,6 @@
+playersign = X
+aisign = O
+invalidmove = The move is not valid, please choose a different position!
+playervictory = Congratulations! You have won!\nPlease enter your name.
+aivictory = Game over! You have lost...
+draw =Good job! It's a draw!

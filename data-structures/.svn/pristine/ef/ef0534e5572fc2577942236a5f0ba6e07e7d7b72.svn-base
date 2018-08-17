@@ -1,0 +1,192 @@
+package com.egtinteractive.data_structures.map;
+
+import java.lang.reflect.Field;
+
+public class MyMap<K, V> implements Map<K, V> {
+
+    private static final int DEFAULT_SIZE = 16;
+    private static final float LOAD_FACTOR = 0.75F;
+    private Entry<K, V>[] buckets;
+    private Size size;
+    private CollisionSolvingStrategy strategy;
+
+    @SuppressWarnings("unchecked")
+    public MyMap() {
+	this.buckets = new Entry[DEFAULT_SIZE];
+	this.size = new Size();
+	this.strategy = CollisionSolvingStrategy.CHAINING;
+    }
+
+    @SuppressWarnings("unchecked")
+    public MyMap(CollisionStrategy strategy) {
+	this.buckets = new Entry[DEFAULT_SIZE];
+	this.size = new Size();
+	this.strategy = CollisionSolvingStrategy.valueOf(strategy.toString());
+    }
+
+    @Override
+    public V get(final K key) {
+	return this.strategy.get(key, buckets);
+    }
+
+    @Override
+    public V put(final K key, final V value) {
+	final double result = Double.valueOf(size.getSize()) / buckets.length;
+	if (result >= LOAD_FACTOR) {
+	    increaseSize();
+	}
+	return this.strategy.put(key, value, buckets, size);
+    }
+
+    @Override
+    public V remove(final K key) {
+	return this.strategy.remove(key, buckets, size);
+    }
+
+    @Override
+    public boolean containsKey(final K key) {
+	return this.strategy.containsKey(key, buckets);
+    }
+
+    @Override
+    public boolean containsValue(final V value) {
+	return this.strategy.containsValue(value, buckets);
+    }
+
+    @Override
+    public int size() {
+	return this.size.getSize();
+    }
+
+    @Override
+    public void clear() {
+	this.strategy.clear(buckets, size);
+	buckets = new Entry[DEFAULT_SIZE];
+    }
+
+    @SuppressWarnings("unchecked")
+    private void increaseSize() {
+	Entry<K, V>[] newBuckets = new Entry[buckets.length * 2];
+	for (int i = 0; i < buckets.length; i++) {
+	    newBuckets[i] = buckets[i];
+	}
+	buckets = newBuckets;
+    }
+
+    static class Size {
+	private int value;
+
+	public Size() {
+	    this.value = 0;
+	}
+
+	public void incrementSize() {
+	    this.value++;
+	}
+
+	public void reduceSize() {
+	    this.value--;
+	}
+
+	public void resetSize() {
+	    this.value = 0;
+	}
+
+	public int getSize() {
+	    return this.value;
+	}
+
+    }
+
+    static class Entry<K, V> {
+
+	private Entry<K, V> next;
+	private K key;
+	private V value;
+
+	public Entry(K key, V value) {
+	    super();
+	    this.key = key;
+	    this.value = value;
+	}
+
+	public Entry<K, V> getNext() {
+	    return next;
+	}
+
+	public void setNext(Entry<K, V> next) {
+	    this.next = next;
+	}
+
+	public K getKey() {
+	    return key;
+	}
+
+	public V getValue() {
+	    return value;
+	}
+
+	public void setValue(final V value) {
+	    this.value = value;
+	}
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	if (o == this)
+	    return true;
+	if (!(o instanceof Map))
+	    return false;
+	int size = size();
+	if (size != ((Map<?, ?>) o).size())
+	    return false;
+
+	Map<?, ?> m = (MyMap<?, ?>) o;
+	Entry<?, ?>[] otherBuckets = null;
+	try {
+	    Field f;
+	    f = m.getClass().getDeclaredField("buckets");
+	    f.setAccessible(true);
+	    otherBuckets = (Entry[]) f.get(m);
+	} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+	    return false;
+	}
+
+	for (int i = 0; i < buckets.length; i++) {
+	    Entry<K, V> myCurrEntry = buckets[i];
+	    Entry<?, ?> otherCurrEntry = otherBuckets[i];
+
+	    while (myCurrEntry != null) {
+		if (!myCurrEntry.getKey().equals(otherCurrEntry.getKey()) || myCurrEntry.getValue() != null
+			&& !myCurrEntry.getValue().equals(otherCurrEntry.getValue())) {
+		    return false;
+		}
+
+		myCurrEntry = myCurrEntry.getNext();
+		otherCurrEntry = otherCurrEntry.getNext();
+	    }
+
+	}
+
+	return true;
+    }
+
+    public int hashCode() {
+	int hashCode = 1;
+	int size = buckets.length;
+	for (int i = 0; i < size; i++) {
+	    Entry<K, V> myCurrEntry = buckets[i];
+	    while (myCurrEntry != null) {
+		if (myCurrEntry.getValue() != null) {
+		    hashCode = 31 * hashCode + (myCurrEntry.getKey().hashCode() + myCurrEntry.getValue().hashCode());
+		} else {
+		    hashCode = 31 * hashCode + myCurrEntry.getKey().hashCode();
+		}
+		myCurrEntry = myCurrEntry.getNext();
+	    }
+	}
+	return hashCode;
+    }
+
+}

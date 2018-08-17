@@ -1,0 +1,122 @@
+package statemachine;
+
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.testng.Assert.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import machinefactory.VendingMachineFactory;
+import resources.MachineLoader;
+import static resources.MyReflection.*;
+import resources.ProductNames;
+
+public class ComplexTests {
+    final String NAME = UUID.randomUUID().toString();
+    private VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = VendingMachineFactory.createVendingMachine();
+	MachineLoader.loadMachine(machine);
+    }
+
+    @Test
+    public void aLotOfDifferentPurchasesShouldAddToMachineMoney() {
+	long moneyCollected = 0L;
+	String productName = ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)]
+		.getName();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 800));
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	    machine.takeItem();
+	}
+
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	    machine.takeItem();
+	}
+	machine.returnMoney();
+	assertTrue(isStateCorrect(machine, States.STAND_BY));
+
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 700));
+	machine.returnMoney();
+
+	assertTrue(isStateCorrect(machine, States.STAND_BY));
+
+	productName = ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)]
+		.getName();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 600));
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	}
+
+	machine.takeItem();
+	productName = ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)]
+		.getName();
+
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	    machine.takeItem();
+	}
+
+	final long totalMoney = machine.getTotalMoney();
+
+	assertEquals(totalMoney, moneyCollected);
+
+    }
+
+    @Test
+    public void aLotOfDifferentOperationsAndThenErrorShouldStillHaveTotalMoney() {
+	final ProductNames[] names = ProductNames.values();
+	long moneyCollected = 0L;
+	machine.putCoins(ThreadLocalRandom.current().nextLong(20, 40));
+	final int count = ThreadLocalRandom.current().nextInt(10, 20);
+	for (int i = 0; i < count; i++) {
+	    final int id = ThreadLocalRandom.current().nextInt(7);
+	    if (machine.selectItem(names[id].getName()) != null) {
+		moneyCollected += machine.getItemPrice(names[id].getName());
+		machine.takeItem();
+	    }
+	}
+
+	machine.service();
+
+	final long totalMoney = machine.getTotalMoney();
+
+	assertEquals(totalMoney, moneyCollected);
+    }
+
+    @Test
+    public void addingNewItemThenBuyingAllOfItShouldRemoveIt() {
+	final int count = ThreadLocalRandom.current().nextInt(5, 30);
+	machine.service();
+	machine.addProduct(NAME, ThreadLocalRandom.current().nextLong(10, 40), count);
+	machine.service();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(10000, 20000));
+	for (int i = 0; i < count; i++) {
+	    assertNotNull(machine.selectItem(NAME));
+	    machine.takeItem();
+	}
+
+	assertNull(machine.selectItem(NAME));
+    }
+
+    @Test
+    public void buyAllProducts() {
+	final int count = machine.getItemsCount();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(8000, 15000) * count);
+	final ProductNames[] names = ProductNames.values();
+
+	for (int i = 0; i < count; i++) {
+	    while (machine.selectItem(names[i].getName()) != null) {
+		machine.takeItem();
+	    }
+	}
+	assertEquals(machine.getItemsCount(), 0);
+    }
+
+}

@@ -1,0 +1,34 @@
+package egt.interactive.tic_tac_toe.resources;
+
+import java.lang.reflect.Field;
+
+import egt.interactive.tic_tac_toe.game.ArcadeGame;
+import egt.interactive.tic_tac_toe.states.GameOutcome;
+import egt.interactive.tic_tac_toe.states.States;
+
+public class MyReflection {
+
+    public static boolean isStateCorrect(final ArcadeGame game, final States targetState) {
+	try {
+	    final Field field = game.getClass().getDeclaredField("state");
+	    field.setAccessible(true);
+	    final States state = (States) field.get(game);
+	    return state.equals(targetState);
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	}
+
+    }
+    
+    public static boolean isOutcomeCorrect(final ArcadeGame game, final GameOutcome targetOutcome) {
+   	try {
+   	    final Field field = game.getClass().getDeclaredField("outcome");
+   	    field.setAccessible(true);
+	    final GameOutcome state = (GameOutcome) field.get(game);
+   	    return state.equals(targetOutcome);
+   	} catch (Exception e) {
+   	    throw new RuntimeException(e);
+   	}
+
+       }
+}

@@ -1,0 +1,23 @@
+package resources;
+
+import java.lang.reflect.Field;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+
+public class MyReflection {
+
+    public static boolean isStateCorrect(VendingMachine machine, States targetState) {
+	States state = null;
+	try {
+	    Class<? extends VendingMachine> c = machine.getClass();
+	    Field field = c.getDeclaredField("state");
+	    field.setAccessible(true);
+	    state = (States) field.get(machine);
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	}
+
+	return state.equals(targetState);
+    }
+}

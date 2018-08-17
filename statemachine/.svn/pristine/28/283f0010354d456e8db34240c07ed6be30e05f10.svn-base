@@ -1,0 +1,193 @@
+package egt.interactive.statemachine;
+
+public enum States {
+
+    STAND_BY {
+	/*
+	 * The machine is ready for customers!
+	 */
+	@Override
+	boolean putCoins(final VendingMachine machine) {
+	    machine.setState(States.SELECTING_ITEM);
+	    return true;
+	}
+
+	@Override
+	boolean selectItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean takeItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean service(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean returnMoney(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean addProduct(final VendingMachine machine) {
+	    // TODO Auto-generated method stub
+	    return true;
+	}
+
+    },
+
+    SELECTING_ITEM {
+	/*
+	 * Coins have been put in machine and is now ready to select and prepare
+	 * item for customer
+	 */
+
+	@Override
+	boolean putCoins(final VendingMachine machine) {
+	    // Should add the coins
+	    return true;
+	}
+
+	@Override
+	boolean selectItem(final VendingMachine machine) {
+	    // First checks if customer has enough coins and if there is enough
+	    // of this item, if yes continue normally with purchase, else don't
+	    // do anything.
+	    machine.setState(States.TAKE_ITEM);
+	    return true;
+	}
+
+	@Override
+	boolean takeItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean service(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean returnMoney(final VendingMachine machine) {
+	    // Returns all customer coins in machine and returns back to
+	    // STAND_BY
+	    machine.setState(States.STAND_BY);
+	    return true;
+	}
+
+	@Override
+	boolean addProduct(final VendingMachine machine) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+    },
+
+    TAKE_ITEM {
+	/*
+	 * Machine has prepared item for customer successfully and is now
+	 * waiting for item to be picked by customer
+	 */
+	@Override
+	boolean putCoins(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean selectItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean takeItem(final VendingMachine machine) {
+	    /*
+	     * Checks if there are coins left in machine, if yes return to
+	     * select menu and give option to continue buying, else go back to
+	     * STAND_BY
+	     */
+	    if (machine.hasMoneyLeft()) {
+		machine.setState(States.SELECTING_ITEM);
+		ConsoleWriter.write(machine.toString());
+	    } else {
+		machine.setState(States.STAND_BY);
+	    }
+	    return true;
+	}
+
+	@Override
+	boolean service(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean returnMoney(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean addProduct(final VendingMachine machine) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+    },
+
+    SERVICE {
+	/*
+	 * A fatal error has occurred while the machine was working... Machine
+	 * will now be out of service until fixed! When fixed it should return
+	 * back to STAND_BY state. Machine should return any money put by a
+	 * customer when error occurred!
+	 */
+
+	@Override
+	boolean putCoins(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean selectItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean takeItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean service(final VendingMachine machine) {
+	    machine.setState(States.STAND_BY);
+	    return true;
+	}
+
+	@Override
+	boolean returnMoney(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	boolean addProduct(final VendingMachine machine) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+    };
+
+    abstract boolean putCoins(final VendingMachine machine);
+
+    abstract boolean selectItem(final VendingMachine machine);
+
+    abstract boolean takeItem(final VendingMachine machine);
+
+    abstract boolean service(final VendingMachine machine);
+
+    abstract boolean returnMoney(final VendingMachine machine);
+
+    abstract boolean addProduct(final VendingMachine machine);
+
+}

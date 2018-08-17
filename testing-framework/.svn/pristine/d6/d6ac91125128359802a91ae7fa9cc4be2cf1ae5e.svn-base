@@ -1,0 +1,34 @@
+import java.util.ArrayList;
+// classes.add(EqualsTests.class.getName());
+	// classes.add(ExpectedExceptionTests.class.getName());
+	// classes.add(GetTests.class.getName
+import java.util.List;
+
+import com.egtinteractive.data_structures.list.AddTests;
+
+import egt.interactive.testing_framework.MethodsClaimer;
+import egt.interactive.testing_framework.enums.TestingAnnotations;
+import egt.interactive.testing_framework.io.ConsoleIO;
+
+public class App {
+
+    public static void main(String[] args) {
+
+	MethodsClaimer claimer = new MethodsClaimer(new ConsoleIO(), TestingAnnotations.TEST_NG);
+
+	List<String> classes = new ArrayList<>();
+	classes.add(AddTests.class.getName());
+	// classes.add(ClearTests.class.getName());
+	// classes.add(ContainsTests.class.getName());());
+	// classes.add(HashCodeTests.class.getName());
+	// classes.add(IndexOfTests.class.getName());
+	// classes.add(IteratorTests.class.getName());
+	// classes.add(RemoveTests.class.getName());
+	// classes.add(SetTests.class.getName());
+	// classes.add(SizeTests.class.getName());
+
+	// claimer.loadMethods(classes);
+
+    }
+
+}

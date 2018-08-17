@@ -1,0 +1,12 @@
+package machinefactory;
+
+import egt.interactive.statemachine.VendingMachine;
+import egt.interactive.writer.ConsoleWriter;
+
+public class VendingMachineFactory {
+
+    public static VendingMachine createVendingMachine() {
+	return new VendingMachine(16, new ConsoleWriter());
+    }
+
+}

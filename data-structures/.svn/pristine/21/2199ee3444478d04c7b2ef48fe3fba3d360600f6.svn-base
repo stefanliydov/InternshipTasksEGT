@@ -1,0 +1,30 @@
+package com.egtinteractive.data_structures.tree;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class ExceptionTests {
+
+    private static final int ZERO = 0;
+    private Tree<Integer> tree;
+    private int size;
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(100, 300);
+    }
+
+    @BeforeMethod
+    public void resetTree() {
+	this.tree = new BinaryTree<>();
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void addNullValuesShouldThrowException(){
+	this.tree.add(null);
+    }
+    
+}

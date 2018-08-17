@@ -1,0 +1,29 @@
+package com.egtinteractive.data_structures;
+
+
+import com.egtinteractive.data_structures.map.Map;
+import com.egtinteractive.data_structures.map.MyMap;
+
+/**
+ * Hello world!
+ *
+ */
+public class App {
+    public static void main(String[] args) {
+	// System.out.println("Hello World!");
+	/*
+	 * List<Integer> list = new ArrayList<>(); list.add(1); list.add(2);
+	 * list.add(3); list.add(4); System.out.println(list.indexOf(10)); for
+	 * (int i : list) { System.out.println(i); }
+	 * //System.out.println(list.size());
+	 */
+
+	Map<String, Integer> map = new MyMap<>();
+	map.put("A", 1);
+	map.put("B", 2);
+	map.put("C", 3);
+	Integer result =map.get("d");
+	System.out.println(result);
+
+    }
+}

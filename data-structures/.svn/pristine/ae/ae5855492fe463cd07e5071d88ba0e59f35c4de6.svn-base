@@ -1,0 +1,31 @@
+package com.egtinteractive.data_structures;
+
+
+
+import java.util.Iterator;
+
+import com.egtinteractive.data_structures.list.ArrayList;
+import com.egtinteractive.data_structures.list.List;
+
+
+public class Test2 {
+
+    public static void main(String[] args){
+	
+	List<Integer> list = new ArrayList<>();
+	list.add(2);
+	list.add(3);
+	list.add(4);
+	final Iterator<Integer> iterator = list.iterator();
+	while(iterator.hasNext()){
+	    iterator.next();
+	    iterator.remove();
+	    break;
+	}
+	System.out.println("Hello");
+	for (int i : list) {
+	    System.out.println(i);
+	}
+	
+    }
+}

@@ -1,0 +1,143 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.map.Map;
+import com.egtinteractive.data_structures.map.MyMap;
+
+
+public class MapTests  {
+
+    Map<String, Integer> map;
+
+    @BeforeMethod
+    public void mapReset() {
+	this.map = new MyMap<>();
+    }
+
+    // Get Method Tests
+    @Test
+    public void getShouldReturnCorrectValue() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	this.map.put("D", 4);
+
+	final int result = this.map.get("C");
+	Assert.assertEquals(result, 3);
+    }
+
+    @Test
+    public void getShouldReturnNullIfKeyIsNotPresent() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	this.map.put("D", 4);
+
+	final Integer result = this.map.get("G");
+	Assert.assertEquals(result, null);
+    }
+
+    // Put Method Tests
+    @Test
+    public void putShouldAddPairToMap() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	final boolean result = this.map.containsKey("B");
+	Assert.assertTrue(result);
+    }
+
+    // Remove Method Tests
+    @Test
+    public void removeShouldRemovePair() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	this.map.remove("B");
+	final boolean result = this.map.containsKey("B");
+	Assert.assertFalse(result);
+    }
+
+    @Test
+    public void removeShouldRemovePairAndReturnCorrectResult() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+
+	final int result = this.map.remove("B");
+	Assert.assertEquals(result, 2);
+    }
+
+    @Test
+    public void removeShouldReturnNullIfNothingIsFound() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+
+	final Integer result = this.map.remove("D");
+	Assert.assertEquals(result, null);
+    }
+
+    // ContainsKey Method Tests
+    @Test
+    public void containsShouldReturnTrueIfContains() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	final boolean result = this.map.containsKey("B");
+	Assert.assertTrue(result);
+    }
+
+    @Test
+    public void containsShouldReturnFalseIfNotContains() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	final boolean result = this.map.containsKey("D");
+	Assert.assertFalse(result);
+    }
+
+    // ContainsValue Method Tests
+    @Test
+    public void containsValueShouldReturnTrueIfContains() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	final boolean result = this.map.containsValue(2);
+	Assert.assertTrue(result);
+    }
+
+    @Test
+    public void containsShoulValuedReturnFalseIfNotContains() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	final boolean result = this.map.containsValue(10);
+	Assert.assertFalse(result);
+    }
+
+    // Size Method Tests
+    @Test
+    public void sizeShouldReturnCorrectSize() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	final int result = this.map.size();
+	Assert.assertEquals(result, 3);
+    }
+
+    // Clear Method Tests
+    @Test
+    public void clearShouldDeleteAllElements() {
+	this.map.put("A", 1);
+	this.map.put("B", 2);
+	this.map.put("C", 3);
+	this.map.clear();
+	final int result = this.map.size();
+	Assert.assertEquals(result, 0);
+    }
+
+}

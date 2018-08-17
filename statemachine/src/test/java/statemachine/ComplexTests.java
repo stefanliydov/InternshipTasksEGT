@@ -1,0 +1,124 @@
+package statemachine;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static resources.MyReflection.isStateCorrect;
+
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import resources.ProductNames;
+
+public class ComplexTests {
+    final String NAME = UUID.randomUUID().toString();
+
+    @DataProvider(name = "getFullMachine")
+    public Object[][] getData() {
+	Object[][] fullMachineDataProvider = resources.MyDataProvider.getFullMachineDataProvider();
+	return fullMachineDataProvider;
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void aLotOfDifferentPurchasesShouldAddToMachineMoney(final VendingMachine machine) {
+	long moneyCollected = 0L;
+	String productName = ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)]
+		.getName();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 800));
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	    machine.takeItem();
+	}
+
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	    machine.takeItem();
+	}
+	machine.returnMoney();
+	assertTrue(isStateCorrect(machine, States.STAND_BY));
+
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 700));
+	machine.returnMoney();
+
+	assertTrue(isStateCorrect(machine, States.STAND_BY));
+
+	productName = ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)]
+		.getName();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 600));
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	}
+
+	machine.takeItem();
+	productName = ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)]
+		.getName();
+
+	if (machine.selectItem(productName) != null) {
+	    moneyCollected += machine.getItemPrice(productName);
+	    machine.takeItem();
+	}
+
+	final long totalMoney = machine.getTotalMoney();
+
+	assertEquals(totalMoney, moneyCollected);
+
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void aLotOfDifferentOperationsAndThenErrorShouldStillHaveTotalMoney(final VendingMachine machine) {
+	final ProductNames[] names = ProductNames.values();
+	long moneyCollected = 0L;
+	machine.putCoins(ThreadLocalRandom.current().nextLong(20, 40));
+	final int count = ThreadLocalRandom.current().nextInt(10, 20);
+	for (int i = 0; i < count; i++) {
+	    final int id = ThreadLocalRandom.current().nextInt(7);
+	    if (machine.selectItem(names[id].getName()) != null) {
+		moneyCollected += machine.getItemPrice(names[id].getName());
+		machine.takeItem();
+	    }
+	}
+
+	machine.service();
+
+	final long totalMoney = machine.getTotalMoney();
+
+	assertEquals(totalMoney, moneyCollected);
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void addingNewItemThenBuyingAllOfItShouldRemoveIt(final VendingMachine machine) {
+	final int count = ThreadLocalRandom.current().nextInt(5, 30);
+	machine.service();
+	machine.addProduct(NAME, ThreadLocalRandom.current().nextLong(10, 40), count);
+	Assert.assertTrue(machine.fixMachine());
+	machine.putCoins(ThreadLocalRandom.current().nextLong(10000, 20000));
+	for (int i = 0; i < count; i++) {
+	    assertNotNull(machine.selectItem(NAME));
+	    machine.takeItem();
+	}
+
+	assertNull(machine.selectItem(NAME));
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void buyAllProducts(final VendingMachine machine) {
+	final int count = machine.getItemsCount();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(8000, 15000) * count);
+	final ProductNames[] names = ProductNames.values();
+
+	for (int i = 0; i < count; i++) {
+	    while (machine.selectItem(names[i].getName()) != null) {
+		machine.takeItem();
+	    }
+	}
+	assertEquals(machine.getItemsCount(), 0);
+    }
+
+}

@@ -1,0 +1,181 @@
+package egt.interactive.tic_tac_toe.game;
+
+import egt.interactive.tic_tac_toe.ai_strategy.AiStrategy;
+import egt.interactive.tic_tac_toe.ai_strategy.RandomStrategy;
+import egt.interactive.tic_tac_toe.arcade.BoardArcadeGame;
+import egt.interactive.tic_tac_toe.board.Board;
+import egt.interactive.tic_tac_toe.board.TicTacToeBoard;
+import egt.interactive.tic_tac_toe.connection.DBQueryExecutor;
+import egt.interactive.tic_tac_toe.drawer.BoardDrawer;
+import egt.interactive.tic_tac_toe.drawer.TicTacToeBoardDrawer;
+import egt.interactive.tic_tac_toe.game_messages.GameMessages;
+import egt.interactive.tic_tac_toe.io.ConsoleIO;
+import egt.interactive.tic_tac_toe.io.IO;
+
+public class TicTacToe implements GameMachine, BoardArcadeGame {
+    private final GameMessages messages;
+    private final Board board;
+    private final BoardDrawer drawer;
+    private final IO io;
+    private final AiStrategy ai;
+    private final DBQueryExecutor connection;
+    private States state;
+    private int totalMoneyCollected;
+    private int coins;
+    private GameOutcome outcome;
+
+    private TicTacToe(final Builder builder) {
+	this.ai = builder.ai;
+	this.io = builder.io;
+	this.board = builder.board;
+	this.drawer = new TicTacToeBoardDrawer(io);
+	this.state = States.STAND_BY;
+	this.connection = builder.connection;
+	this.messages = new GameMessages();
+    }
+
+    public static class Builder {
+	private IO io = new ConsoleIO();
+	private Board board = new TicTacToeBoard();
+	private AiStrategy ai = new RandomStrategy();
+	private DBQueryExecutor connection = new DBQueryExecutor();
+
+	public Builder io(final IO val) {
+	    io = val;
+	    return this;
+	}
+
+	public Builder board(final Board val) {
+	    board = val;
+	    return this;
+	}
+
+	public Builder aiStrategy(final AiStrategy val) {
+	    ai = val;
+	    return this;
+	}
+
+	public Builder connection(final DBQueryExecutor val) {
+	    connection = val;
+	    return this;
+	}
+
+	public BoardArcadeGame build() {
+	    return new TicTacToe(this);
+	}
+    }
+
+    @Override
+    public int putCoins(final int coins) {
+	return this.state.putCoins(this, coins) ? this.returnExtraMoney() : coins;
+
+    }
+
+    @Override
+    public boolean playMove(final int move) {
+	return this.state.playMove(this, move);
+    }
+
+    @Override
+    public int returnMoney() {
+	if (this.state.returnMoney(this)) {
+	    final int temp = this.coins;
+	    this.coins = 0;
+	    return temp;
+	}
+	return 0;
+    }
+
+    @Override
+    public boolean giveName(final String name) {
+	return this.outcome.giveName(this, name);
+
+    }
+
+    @Override
+    public boolean endGame() {
+	return this.state.endGame(this);
+    }
+
+    @Override
+    public Board getBoard() {
+	return this.board;
+    }
+
+    @Override
+    public States getState() {
+	return this.state;
+    }
+
+    @Override
+    public int getCoins() {
+	return this.coins;
+    }
+
+    @Override
+    public void insertCash(final int coins) {
+	this.coins += coins;
+
+    }
+
+    @Override
+    public void setState(final States state) {
+	this.state = state;
+
+    }
+
+    @Override
+    public void takeMoney(final int money) {
+	this.totalMoneyCollected += money;
+
+    }
+
+    private int returnExtraMoney() {
+	if (this.coins > 10) {
+	    return coins - 10;
+	}
+	return 0;
+    }
+
+    @Override
+    public GameOutcome getOutCome() {
+	return this.outcome;
+    }
+
+    @Override
+    public IO getIO() {
+	return this.io;
+    }
+
+    @Override
+    public void setOutcome(final GameOutcome outcome) {
+	this.outcome = outcome;
+
+    }
+
+    @Override
+    public BoardDrawer getDrawer() {
+	return this.drawer;
+    }
+
+    @Override
+    public int getTotalMoney() {
+	return this.totalMoneyCollected;
+    }
+
+    @Override
+    public AiStrategy getAi() {
+	return this.ai;
+    }
+
+    @Override
+    public DBQueryExecutor getConnection() {
+	return this.connection;
+    }
+
+    @Override
+    public GameMessages getMessages() {
+	return this.messages;
+    }
+
+}

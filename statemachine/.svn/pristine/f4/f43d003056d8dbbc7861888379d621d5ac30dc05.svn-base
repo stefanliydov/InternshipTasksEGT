@@ -1,0 +1,16 @@
+package resources;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class MachineLoader {
+    public static void loadMachine(VendingMachine machine) {
+	final String[] names = new String[] { "Croissant", "Coca-Cola", "Kit-Kat", "Sprite", "Snickers", "Chips",
+		"Gummy Bears" };
+	for (int i = 0; i < names.length; i++) {
+	    machine.addProduct(names[i], ThreadLocalRandom.current().nextLong(50, 400),
+		    ThreadLocalRandom.current().nextInt(10, 20));
+	}
+    }
+}

@@ -1,0 +1,107 @@
+package egt.interactive.tic_tac_toe.resources;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import egt.interactive.tic_tac_toe.connection.DBConnectionFactory;
+import egt.interactive.tic_tac_toe.connection.DBCredentials;
+import egt.interactive.tic_tac_toe.game.GameOutcome;
+
+public class DBQueryHelper {
+    private final static DBCredentials credentials = new DBCredentials();
+
+    public void dropCreateTablesAndAddInfo() {
+	String user = credentials.getUSER();
+	String password = credentials.getPASSWORD();
+
+	Process command = null;
+	try {
+	    final String initScriptName = "src/main/resources/tic-tac-toe.sql";
+
+	    final String executeInitScript = String.format("mysql -u %s -p%s < %s", user, password, initScriptName);
+	    final String[] cmd = { "/bin/sh", "-c", executeInitScript };
+
+	    command = Runtime.getRuntime().exec(cmd);
+	    if (command.waitFor() != 0) {
+		throw new RuntimeException("make sure that init script is in the correct folder");
+	    }
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    if (command != null) {
+		command.destroy();
+	    }
+	}
+    }
+
+    public void dropCreateEmptyTables() {
+	String user = credentials.getUSER();
+	String password = credentials.getPASSWORD();
+	Process command = null;
+	try {
+	    final String initScriptName = "src/main/resources/tic-tac-toe-empty.sql";
+
+	    final String executeInitScript = String.format("mysql -u %s -p%s < %s", user, password, initScriptName);
+	    final String[] cmd = { "/bin/sh", "-c", executeInitScript };
+
+	    command = Runtime.getRuntime().exec(cmd);
+	    if (command.waitFor() != 0) {
+		throw new RuntimeException("make sure that init script is in the correct folder");
+	    }
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    if (command != null) {
+		command.destroy();
+	    }
+	}
+    }
+
+    public Integer getPlayersCount() {
+	final String selectStatement = "SELECT count(*) as count FROM tic_tac_toe.players;";
+	try (final Connection connection = DBConnectionFactory.getConnection(credentials.getURL(),
+		credentials.getUSER(), credentials.getPASSWORD());
+		final Statement stmt = connection.createStatement();
+		final ResultSet rs = stmt.executeQuery(selectStatement)) {
+	    if (rs.next()) {
+		return Integer.valueOf(rs.getString("count"));
+	    }
+	    return null;
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    public Integer getGamesCount() {
+	final String selectStatement = "SELECT count(*) as count FROM tic_tac_toe.games;";
+	try (final Connection connection = DBConnectionFactory.getConnection(credentials.getURL(),
+		credentials.getUSER(), credentials.getPASSWORD());
+		final Statement stmt = connection.createStatement();
+		final ResultSet rs = stmt.executeQuery(selectStatement)) {
+	    if (rs.next()) {
+		return Integer.valueOf(rs.getString("count"));
+	    }
+	    return null;
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    public GameOutcome getGameOutcome() {
+	final String selectStatement = "SELECT outcome  FROM tic_tac_toe.games WHERE id =1;";
+	try (final Connection connection = DBConnectionFactory.getConnection(credentials.getURL(),
+		credentials.getUSER(), credentials.getPASSWORD());
+		final Statement stmt = connection.createStatement();
+		final ResultSet rs = stmt.executeQuery(selectStatement)) {
+	    if (rs.next()) {
+		return GameOutcome.valueOf(rs.getString("outcome"));
+	    }
+	    return null;
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+}

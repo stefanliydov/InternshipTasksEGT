@@ -1,0 +1,110 @@
+package egt.interactive.statemachine;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.concurrent.ThreadLocalRandom;
+
+final class Inventory {
+    private static final int INVENTORY_SIZE = 16;
+    private final Product[] products;
+    private int itemsSize;
+
+    Inventory() {
+	this.products = new Product[INVENTORY_SIZE];
+	loadProducts();
+    }
+
+    private void loadProducts() {
+	final String[] names = new String[] { "Croissant", "Coca-Cola", "Kit-Kat", "Sprite", "Snickers", "Chips",
+		"Gummy Bears" };
+
+	for (int i = 0; i < names.length; i++) {
+	    products[i] = new Product(names[i], new BigDecimal(ThreadLocalRandom.current().nextDouble(0.50, 4)),
+		    ThreadLocalRandom.current().nextInt(10, 20));
+	}
+	itemsSize = names.length;
+
+    }
+
+    static class Product {
+	private final String name;
+	private final BigDecimal price;
+	private int quantity;
+
+	public Product(final String name, final BigDecimal price, final int quantity) {
+	    this.name = name;
+	    this.price = price;
+	    this.quantity = quantity;
+	}
+
+	public int getQuantity() {
+	    return this.quantity;
+	}
+
+	public String getName() {
+	    return this.name;
+	}
+
+	public BigDecimal getPrice() {
+	    return this.price;
+	}
+
+	public void buyOne() {
+	    this.quantity--;
+	}
+
+	public boolean isEmpty() {
+	    return quantity == 0;
+	}
+
+	@Override
+	public String toString() {
+	    return new StringBuilder().append(". Name: ").append(this.getName()).append(", price: ")
+		    .append(this.getPrice().setScale(2, RoundingMode.HALF_EVEN)).append("$, quantity left: ")
+		    .append(this.getQuantity()).toString();
+	}
+
+    }
+
+    boolean addProduct(final String name, final BigDecimal price, final int quantity) {
+	if (this.itemsSize == INVENTORY_SIZE) {
+	    return false;
+	} else {
+	    products[itemsSize++] = new Product(name, price, quantity);
+	    return true;
+	}
+    }
+
+    @Override
+    public String toString() {
+	final StringBuilder sb = new StringBuilder();
+	sb.append("Items available: ").append(System.lineSeparator());
+	for (int i = 0; i < itemsSize; i++) {
+	    sb.append(i).append(products[i]).append(System.lineSeparator());
+	}
+	sb.append("Select the item you want by pressing the number of the product!").append(System.lineSeparator());
+	return sb.toString();
+    }
+
+    public Product getProduct(final int id) {
+	return (id < 0 || id >= itemsSize) || products[id] == null ? null : products[id];
+
+    }
+
+    public void reArrangeItems() {
+	for (int i = 0; i < itemsSize; i++) {
+	    if (products[i].isEmpty()) {
+		for (int j = i; j < itemsSize - 1; j++) {
+		    products[j] = products[j + 1];
+		}
+		products[--itemsSize] = null;
+	    }
+
+	}
+    }
+
+    int getItemsCount() {
+	return this.itemsSize;
+    }
+
+}

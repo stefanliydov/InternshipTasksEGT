@@ -1,0 +1,74 @@
+package statemachine;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+import machinefactory.VendingMachineFactory;
+import resources.MachineLoader;
+
+public class PutCoinsTests {
+
+    private VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = VendingMachineFactory.createVendingMachine();
+	MachineLoader.loadMachine(machine);
+    }
+
+    @Test
+    public void addCoinsShouldAddCoins() {
+	final long amount = ThreadLocalRandom.current().nextLong(500, 1000);
+	machine.putCoins(amount);
+
+	final long result = machine.getCoins();
+
+	Assert.assertEquals(result, amount);
+    }
+
+    @Test
+    public void addNegativeAmountOfCoinsShouldReturnZeroCoinsInMachine() {
+	final long amount = ThreadLocalRandom.current().nextLong(-200, 0);
+	final long actual = machine.putCoins(amount);
+	Assert.assertEquals(actual, 0l);
+    }
+
+    @Test
+    public void addZeroAmountOfCoinsShouldReturnZeroCoinsInMachine() {
+	final Long invalidAmount = 0l;
+	final long actual = machine.putCoins(invalidAmount);
+	Assert.assertEquals(actual, 0l);
+    }
+
+    @Test
+    public void addCoinsThenAddInvalidCoinsShoudReturnTheCorrectCoins() {
+	final long expectedAmount = ThreadLocalRandom.current().nextLong(500, 1000);
+	final long coinsInMachine = machine.putCoins(expectedAmount);
+	Assert.assertEquals(coinsInMachine, expectedAmount);
+
+	final Long invalidAmount = ThreadLocalRandom.current().nextLong(-200, 0);
+	final long actual = machine.putCoins(invalidAmount);
+
+	Assert.assertEquals(actual, expectedAmount);
+    }
+
+    @Test
+    public void addCoinsManyTimesShouldReturnCorrectAmount() {
+	long expectedAmount = 0l;
+	final int count = ThreadLocalRandom.current().nextInt(30, 100);
+	for (int i = 0; i < count; i++) {
+	    long amount = ThreadLocalRandom.current().nextLong(500, 1000);
+	    machine.putCoins(amount);
+	    expectedAmount += amount;
+	}
+
+	final long actual = machine.getCoins();
+
+	Assert.assertEquals(actual, expectedAmount);
+    }
+
+}

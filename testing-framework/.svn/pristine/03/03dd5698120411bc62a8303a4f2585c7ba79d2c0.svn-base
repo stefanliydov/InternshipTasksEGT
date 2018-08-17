@@ -1,0 +1,13 @@
+package egt.interactive.testing_framework.resources.test_ng;
+
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+public class DataProviderCorrectnessTest extends BaseTest { 
+
+    @Test(dataProvider = "geInt")
+    private void testProvider(final Integer integer) {
+	Assert.assertEquals(integer, Integer.valueOf(5));
+    }
+}

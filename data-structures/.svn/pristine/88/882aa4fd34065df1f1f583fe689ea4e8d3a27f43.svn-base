@@ -1,0 +1,11 @@
+package com.egtinteractive.data_structures.resources;
+
+import com.egtinteractive.data_structures.list.ArrayList;
+import com.egtinteractive.data_structures.list.LinkedList;
+
+public class MyDataProvider {
+
+    public static Object[][] getListDataProvider(){
+	 return new Object[][] { { new ArrayList<>() }, { new LinkedList<>() } };
+    }
+}

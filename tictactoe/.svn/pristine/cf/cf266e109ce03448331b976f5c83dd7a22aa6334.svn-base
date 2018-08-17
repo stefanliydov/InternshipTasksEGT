@@ -1,0 +1,106 @@
+package egt.interactive.tic_tac_toe.connection;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
+
+import egt.interactive.tic_tac_toe.game.GameOutcome;
+import egt.interactive.tic_tac_toe.player_points.PlayerPoints;
+
+public class DBConnection {
+
+    private final DBConnectionFactory factory;
+
+    public DBConnection() {
+	this.factory = new DBConnectionFactory();
+    }
+
+    public boolean doesPlayerExist(final String name) {
+	return this.getPlayerId(name) != null;
+    }
+
+    public void addPlayer(final String name) {
+	final String selectStatement = "INSERT INTO players(name) VALUES ('" + name + "')";
+	try (final Connection connection = this.factory.getConnection();
+		final Statement stmt = connection.createStatement();) {
+	    stmt.executeUpdate(selectStatement);
+	    connection.close();
+	} catch (Exception e) {
+	    throw new RuntimeException();
+
+	}
+
+    }
+
+    public void addGameWithNoPlayer(final GameOutcome outcome) {
+	final String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+	final String selectStatement = "INSERT INTO games(date_time, outcome) VALUES ('" + timeStamp + "', '"
+		+ outcome.name() + "')";
+
+	try (final Connection connection = this.factory.getConnection();
+		final Statement stmt = connection.createStatement();) {
+	    stmt.executeUpdate(selectStatement);
+	    connection.close();
+	} catch (Exception e) {
+	    throw new RuntimeException();
+	}
+
+    }
+
+    public void addGameWithPlayer(final String playerName, final GameOutcome outcome) {
+	final String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+	final Integer playerId = this.getPlayerId(playerName);
+	final String selectStatement = "INSERT INTO games(player_id, date_time, outcome) VALUES ('" + playerId + "','"
+		+ timeStamp + "', '" + outcome.name() + "')";
+
+	try (final Connection connection = this.factory.getConnection();
+		final Statement stmt = connection.createStatement();) {
+	    stmt.executeUpdate(selectStatement);
+	    connection.close();
+
+	} catch (Exception e) {
+	    throw new RuntimeException();
+	}
+
+    }
+
+    public List<PlayerPoints> getTopThreePlayers() {
+	final List<PlayerPoints> players = new LinkedList<>();
+	final String selectStatement = "SELECT count(*) as total_wins, p.name  FROM players as p "
+		+ "JOIN games as g  ON p.id = g.player_id " + "WHERE g.outcome = 'PLAYER_WINS' GROUP BY g.player_id "
+		+ "ORDER BY total_wins desc, p.name ASC limit 3";
+	try (final Connection connection = this.factory.getConnection();
+		final Statement stmt = connection.createStatement();
+		final ResultSet rs = stmt.executeQuery(selectStatement)) {
+	    if (rs != null) {
+		while (rs.next()) {
+		    players.add(new PlayerPoints(rs.getString("name"), rs.getString("total_wins")));
+		}
+	    }
+	    connection.close();
+	    return players;
+	} catch (Exception e) {
+	    throw new RuntimeException();
+	}
+
+    }
+
+    private Integer getPlayerId(final String playerName) {
+	final String selectStatement = "SELECT * FROM players WHERE name = '" + playerName + "'";
+	try (final Connection connection = this.factory.getConnection();
+		final Statement stmt = connection.createStatement();
+		final ResultSet rs = stmt.executeQuery(selectStatement)) {
+	    if (rs.next()) {
+		return Integer.valueOf(rs.getString("id"));
+	    }
+	    connection.close();
+	    return null;
+	} catch (Exception e) {
+	    throw new RuntimeException();
+	}
+    }
+}

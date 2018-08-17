@@ -1,0 +1,94 @@
+package statemachine;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class SelectingItemStateTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void addSomeCashInMachine() {
+	machine = new VendingMachine();
+	MachineLoader.loadMachine(machine);
+	machine.putCoins("4.00");
+    }
+
+    @Test
+    public void machineShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldNotNeedService() {
+	Assert.assertFalse(machine.service());
+    }
+
+    @Test
+    public void machineShouldAcceptCoinsAndNotChangeState() {
+	machine.putCoins("1.00");
+
+	final BigDecimal coins = machine.getCoins();
+
+	Assert.assertEquals(coins.setScale(2, RoundingMode.HALF_EVEN),
+		new BigDecimal(5.00).setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+    @Test
+    public void machineShouldLetYouSelectItemIfMoneyIsEnough() {
+	Assert.assertTrue(machine.selectItem("Kit-Kat"));
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfMoneyIsNotEnough() {
+	machine.returnMoney();
+	machine.putCoins("0.05");
+	Assert.assertFalse(machine.selectItem("Kit-Kat"));
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfThereIsntEnoughQuantity() {
+	machine.returnMoney();
+	machine.addProduct("dummyProduct", new BigDecimal(ThreadLocalRandom.current().nextDouble(0.20, 4)), 1);
+	machine.putCoins("5.00");
+	machine.selectItem("dummyProduct");
+	machine.takeItem();
+	Assert.assertFalse(machine.selectItem("dummyProduct"));
+    }
+
+    @Test
+    public void machineShouldNotLetYouAddProductsWhileItsWorking() {
+	Assert.assertFalse(machine.addProduct("dummyProduct", new BigDecimal(0.10), 1));
+    }
+
+    @Test
+    public void machineShouldSelectItemAndThenTakeTheMoneyForIt() {
+	BigDecimal moneyLeft = new BigDecimal("4.00");
+
+	machine.selectItem("Kit-Kat");
+	moneyLeft = moneyLeft.subtract(machine.getItemPrice("Kit-Kat"));
+	final BigDecimal coins = machine.getCoins();
+
+	Assert.assertEquals(coins.setScale(2, RoundingMode.HALF_EVEN), moneyLeft.setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+    @Test
+    public void machineShouldSelectItemAndThenReduceQuantityOfItem() {
+	// final int expected = machine.getItemQuantity("Kit-Kat") - 1;
+	machine.selectItem("Kit-Kat");
+	machine.takeItem();
+
+	// final int result = machine.getItemQuantity("Kit-Kat");
+
+	// Assert.assertEquals(result, expected);
+
+    }
+
+}

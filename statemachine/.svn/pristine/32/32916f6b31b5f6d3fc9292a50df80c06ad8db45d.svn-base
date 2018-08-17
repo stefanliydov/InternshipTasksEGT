@@ -1,0 +1,90 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class SelectingItemStateTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void addSomeCashInMachine() {
+	machine = new VendingMachine();
+	machine.putCoins("4.00");
+    }
+
+    @Test
+    public void machineShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldNotNeedService() {
+	Assert.assertFalse(machine.service());
+    }
+
+    @Test
+    public void machineShouldAcceptCoinsAndNotChangeState()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	machine.putCoins("1.00");
+
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("coins");
+	field.setAccessible(true);
+	BigDecimal coins = (BigDecimal) field.get(machine);
+
+	Assert.assertEquals(coins.setScale(2, RoundingMode.HALF_EVEN),
+		new BigDecimal(5.00).setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+    @Test
+    public void machineShouldLetYouSelectItemIfMoneyIsEnough() {
+	Assert.assertTrue(machine.selectItem(ThreadLocalRandom.current().nextInt(5)));
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfMoneyIsNotEnough() {
+	machine.returnMoney();
+	machine.putCoins("0.05");
+	Assert.assertFalse(machine.selectItem(ThreadLocalRandom.current().nextInt(5)));
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfThereIsntEnoughQuantity() {
+	machine.returnMoney();
+	machine.addProduct("dummyProduct", new BigDecimal(ThreadLocalRandom.current().nextDouble(0.20, 4)), 1);
+	machine.putCoins("5.00");
+	machine.selectItem(7);
+	machine.takeItem();
+	Assert.assertFalse(machine.selectItem(7));
+    }
+
+    @Test
+    public void machineShouldNotLetYouAddProductsWhileItsWorking() {
+	Assert.assertFalse(machine.addProduct("dummyProduct", new BigDecimal(0.10), 1));
+    }
+
+    @Test
+    public void machineShouldSelectItemAndThenTakeTheMoneyForIt()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	BigDecimal moneyLeft = new BigDecimal("4.00");
+	final int id = ThreadLocalRandom.current().nextInt(5);
+	machine.selectItem(id);
+	moneyLeft = moneyLeft.subtract(machine.getItemPrice(id));
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("coins");
+	field.setAccessible(true);
+	BigDecimal coins = (BigDecimal) field.get(machine);
+
+	Assert.assertEquals(coins.setScale(2, RoundingMode.HALF_EVEN), moneyLeft.setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+}

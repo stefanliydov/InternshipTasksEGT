@@ -1,0 +1,123 @@
+package egt.interactive.statemachine;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+final class Inventory {
+    private static final int INVENTORY_SIZE = 16;
+    private static final String SUCCESSFULLY_ADDED_PRODUCT_MESSAGE = "Product added succesfully!";
+    private static final String INVENTORY_FULL_MESSAGE = "Inventory is full! Please make space and then add new item";
+    private Product[] products;
+    private int itemsSize;
+
+    Inventory() {
+	this.products = new Product[INVENTORY_SIZE];
+	loadProducts();
+    }
+
+    private void loadProducts() {
+	Product croissant = new Product("Croissant", new BigDecimal(0.80), 20);
+	Product cocaCola = new Product("Coca-Cola", new BigDecimal(1.50), 20);
+	Product kitKat = new Product("Kit-Kat", new BigDecimal(1.00), 20);
+	Product snickers = new Product("Snickers", new BigDecimal(0.90), 20);
+	Product sprite = new Product("Sprite", new BigDecimal(1.30), 20);
+	Product gummyBears = new Product("Gummy Bears", new BigDecimal(2.20), 20);
+	Product chips = new Product("Chips", new BigDecimal(2.70), 20);
+
+	products[0] = (croissant);
+	products[1] = (cocaCola);
+	products[2] = (kitKat);
+	products[3] = (snickers);
+	products[4] = (sprite);
+	products[5] = (gummyBears);
+	products[6] = (chips);
+	this.itemsSize = 7;
+
+    }
+
+    static class Product {
+	private String name;
+	private BigDecimal price;
+	private int quantity;
+
+	public Product(String name, BigDecimal price, int quantity) {
+	    this.name = name;
+	    this.price = price;
+	    this.quantity = quantity;
+	}
+
+	public int getQuantity() {
+	    return this.quantity;
+	}
+
+	public String getName() {
+	    return this.name;
+	}
+
+	public BigDecimal getPrice() {
+	    return this.price;
+	}
+
+	public void buyOne() {
+	    this.quantity--;
+	}
+    }
+
+    String addProduct(String name, BigDecimal price, int quantity) {
+	for (int i = 0; i < INVENTORY_SIZE; i++) {
+	    if (this.products[i] == null || this.products[i].getQuantity() == 0) {
+		this.products[i] = new Product(name, price, quantity);
+		this.itemsSize++;
+		return SUCCESSFULLY_ADDED_PRODUCT_MESSAGE;
+	    }
+	}
+	return INVENTORY_FULL_MESSAGE;
+    }
+
+    BigDecimal getProductPrice(String name) {
+	for (int i = 0; i < itemsSize; i++) {
+	    if (this.products[i].getName().equals(name)) {
+		return products[i].getPrice();
+	    }
+	}
+	return null;
+    }
+
+    @Override
+    public String toString() {
+	StringBuilder sb = new StringBuilder();
+	sb.append("Items available: ").append(System.lineSeparator());
+	for (int i = 0; i < itemsSize; i++) {
+	    if (products[i] == null) {
+		break;
+	    }
+	    Product product = products[i];
+	    sb.append(i).append(". Name: ").append(product.getName()).append(", price: ")
+		    .append(product.getPrice().setScale(2, RoundingMode.HALF_EVEN)).append("$, quantity left: ")
+		    .append(product.getQuantity()).append(System.lineSeparator());
+	}
+	sb.append("Select the item you want by pressing the number of the product!").append(System.lineSeparator());
+	return sb.toString();
+    }
+
+    public Product getProduct(int id) {
+	if (id < 0 || id >= itemsSize) {
+	    return null;
+	}
+	return products[id] == null ? null : products[id];
+
+    }
+
+    public void reArrangeItems() {
+	for (int i = 0; i < itemsSize; i++) {
+	    if (products[i].getQuantity() == 0) {
+		for (int j = i; j < itemsSize - 1; j++) {
+		    products[j] = products[j + 1];
+		}
+		products[--itemsSize] = null;
+	    }
+
+	}
+    }
+
+}

@@ -1,0 +1,115 @@
+package statemachine;
+
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import egt.interactive.statemachine.product.Product;
+import machinefactory.VendingMachineFactory;
+import resources.MachineLoader;
+import resources.MyReflection;
+import resources.ProductNames;
+
+public class SelectingItemStateTests {
+    private static final long MONEY_TO_ADD = ThreadLocalRandom.current().nextLong(1000, 2000);
+    private static final String NAME = UUID.randomUUID().toString();
+    private VendingMachine machine;
+
+    @BeforeMethod
+    public void addSomeCashInMachine() {
+	machine = VendingMachineFactory.createVendingMachine();
+	MachineLoader.loadMachine(machine);
+	machine.putCoins(MONEY_TO_ADD);
+    }
+
+    @Test
+    public void machineShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldGoToServiceAndReturnMoney() {
+	final long currAmount = machine.getCoins();
+	Assert.assertEquals(currAmount, MONEY_TO_ADD);
+	Assert.assertTrue(machine.service());
+	final long result = machine.getCoins();
+	Assert.assertEquals(result, 0L);
+    }
+
+    @Test
+    public void machineShouldAcceptCoins() {
+	final long expectedAmount = machine.putCoins(ThreadLocalRandom.current().nextLong(1000, 2000));
+	final long coins = machine.getCoins();
+	Assert.assertEquals(coins, expectedAmount);
+    }
+
+    @Test
+    public void machineShouldAcceptCoinsAndNotChangeState() {
+	machine.putCoins(ThreadLocalRandom.current().nextLong(1000, 2000));
+	Assert.assertTrue(MyReflection.isStateCorrect(machine, States.SELECTING_ITEM));
+    }
+
+    @Test
+    public void machineShouldLetYouSelectItemIfMoneyIsEnough() {
+	Assert.assertNotNull(machine.selectItem(
+		ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)].getName()));
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfMoneyIsNotEnough() {
+	machine.returnMoney();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(1, 5));
+	Assert.assertNull(machine.selectItem(
+		ProductNames.values()[ThreadLocalRandom.current().nextInt(ProductNames.values().length)].getName()));
+    }
+
+    @Test
+    public void machineShouldNotLetYouSelectItemIfThereIsntEnoughQuantity() {
+	machine.returnMoney();
+	machine.service();
+	machine.addProduct(NAME, ThreadLocalRandom.current().nextLong(20, 400), 1);
+	machine.service();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 1000));
+	machine.selectItem(NAME);
+	machine.takeItem();
+	Assert.assertNull(machine.selectItem(NAME));
+    }
+
+    @Test
+    public void machineShouldNotLetYouAddProductsWhileItsWorking() {
+	Assert.assertFalse(machine.addProduct(NAME, 10L, 1));
+    }
+
+    @Test
+    public void machineShouldSelectItemAndThenTakeTheMoneyForIt() {
+	Long moneyLeft = machine.getCoins();
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+	machine.selectItem(productName);
+	moneyLeft -= machine.getItemPrice(productName);
+	final Long coins = machine.getCoins();
+
+	Assert.assertEquals(coins, moneyLeft);
+    }
+
+    @Test
+    public void machineShouldSelectItemSuccesfullyAndThenReduceItemQuantity() {
+
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+
+	final int expectedQuantity = machine.getProductQuantity(productName) - 1;
+
+	Product product = machine.selectItem(productName);
+	Assert.assertNotNull(product);
+	final int actualQuantity = machine.getProductQuantity(productName);
+
+	Assert.assertEquals(actualQuantity, expectedQuantity);
+    }
+
+}

@@ -1,0 +1,5 @@
+package com.egtinteractive.data_structures.map;
+
+public enum CollisionSolvingStrategy {
+    CHAINING, LINEAR_PROBING;
+}

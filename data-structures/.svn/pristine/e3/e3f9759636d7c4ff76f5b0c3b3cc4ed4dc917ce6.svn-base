@@ -1,0 +1,289 @@
+package com.egtinteractive.data_structures.map;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MyMap<K, V> implements Map<K, V> {
+
+    private static final int DEFAULT_SIZE = 16;
+    private static final float LOAD_FACTOR = 0.85F;
+    private Entry<K, V>[] buckets;
+    private int size;
+    private CollisionSolvingStrategy strategy;
+    private List<Integer> removedSpaces;
+
+    @SuppressWarnings("unchecked")
+    public MyMap() {
+	this.buckets = new Entry[DEFAULT_SIZE];
+	this.size = 0;
+	this.strategy = CollisionSolvingStrategy.CHAINING;
+	this.removedSpaces = new ArrayList<>();
+    }
+
+    @SuppressWarnings("unchecked")
+    public MyMap(CollisionSolvingStrategy strategy) {
+	this.buckets = new Entry[DEFAULT_SIZE];
+	this.size = 0;
+	this.strategy = strategy;
+	this.removedSpaces = new ArrayList<>();
+    }
+
+    @Override
+    public V get(final K key) {
+	int hashCode = key.hashCode() % DEFAULT_SIZE;
+	Entry<K, V> currEntry = this.buckets[hashCode];
+
+	switch (this.strategy) {
+	case CHAINING:
+	    while (currEntry != null) {
+		if (currEntry.getKey().equals(key)) {
+		    return currEntry.getValue();
+		}
+		currEntry = currEntry.getNext();
+	    }
+	    return null;
+
+	case LINEAR_PROBING:
+	    while (removedSpaces.contains(hashCode)
+		    || buckets[hashCode] != null && !this.buckets[hashCode].key.equals(key)) {
+		hashCode = (hashCode + 1) % this.buckets.length;
+
+	    }
+	    if (buckets[hashCode] != null) {
+		return this.buckets[hashCode].value;
+	    }
+	    return null;
+	default:
+	    return null;
+	}
+    }
+
+    @Override
+    public V put(final K key, final V value) {
+	if (key == null) {
+	    throw new IllegalArgumentException("Key cannot be null!");
+	}
+
+	final Entry<K, V> newEntry = new Entry<>(key, value);
+	int hashCode = key.hashCode() % DEFAULT_SIZE;
+
+	switch (this.strategy) {
+	case CHAINING:
+	    Entry<K, V> currEntry = this.buckets[hashCode];
+	    if (currEntry == null) {
+		this.buckets[hashCode] = newEntry;
+		this.size++;
+		return value;
+	    }
+	    while (currEntry.getNext() != null) {
+		if (currEntry.getKey().equals(newEntry.getKey())) {
+		    currEntry.setValue(value);
+		    return value;
+		}
+		currEntry = currEntry.getNext();
+	    }
+	    if (currEntry.getKey().equals(newEntry.getKey())) {
+		currEntry.setValue(value);
+		return value;
+	    }
+	    currEntry.setNext(newEntry);
+	    this.size++;
+	    return value;
+
+	case LINEAR_PROBING:
+
+	    while (this.buckets[hashCode] != null && !this.buckets[hashCode].key.equals(key)) {
+		if (this.buckets[hashCode].key.equals(key)) {
+
+		}
+		hashCode = (hashCode + 1) % this.buckets.length;
+	    }
+	    if (buckets[hashCode] != null) {
+		buckets[hashCode].value = value;
+		return value;
+	    } else {
+		buckets[hashCode] = newEntry;
+		this.size++;
+		if (1.0f * this.size / this.buckets.length >= LOAD_FACTOR) {
+		    this.increaseSize();
+		}
+		if (this.removedSpaces.contains(hashCode)) {
+		    this.removedSpaces.remove(Integer.valueOf(hashCode));
+		}
+		return value;
+	    }
+	default:
+	    return null;
+	}
+    }
+
+    @SuppressWarnings("unchecked")
+    private void increaseSize() {
+	Entry<K, V>[] newBuckets = new Entry[this.buckets.length * 2];
+	for (int i = 0; i < this.buckets.length; i++) {
+	    newBuckets[i] = this.buckets[i];
+	}
+	this.buckets = newBuckets;
+    }
+
+    @Override
+    public V remove(final K key) {
+	int hashCode = key.hashCode() % DEFAULT_SIZE;
+
+	switch (this.strategy) {
+	case CHAINING:
+	    Entry<K, V> parentEntry = this.buckets[hashCode];
+	    if (parentEntry == null) {
+		return null;
+	    }
+	    if (parentEntry.getKey() != null && parentEntry.getKey().equals(key)) {
+		this.buckets[hashCode] = parentEntry.getNext();
+		size--;
+		return parentEntry.getValue();
+	    }
+	    Entry<K, V> currEntry = parentEntry.getNext();
+
+	    while (currEntry != null) {
+
+		if (parentEntry.getKey() != null && currEntry.getKey().equals(key)) {
+		    parentEntry.setNext(currEntry.getNext());
+		    size--;
+		    return currEntry.value;
+		}
+		parentEntry = currEntry;
+		currEntry = currEntry.getNext();
+	    }
+	    return null;
+
+	case LINEAR_PROBING:
+	    while (removedSpaces.contains(hashCode) || buckets[hashCode] != null && buckets[hashCode].getKey() != null
+		    && !this.buckets[hashCode].key.equals(key)) {
+		hashCode = (hashCode + 1) % this.buckets.length;
+	    }
+	    if (buckets[hashCode] != null) {
+		final V result = buckets[hashCode].value;
+		buckets[hashCode] = null;
+		this.size--;
+		this.removedSpaces.add(hashCode);
+		return result;
+	    }
+	    return null;
+
+	default:
+	    return null;
+	}
+    }
+
+    @Override
+    public boolean containsKey(final K key) {
+	int hashCode = key.hashCode() % DEFAULT_SIZE;
+
+	switch (this.strategy) {
+	case CHAINING:
+
+	    Entry<K, V> currEntry = this.buckets[hashCode];
+
+	    while (currEntry != null) {
+		if (currEntry.getKey() != null && currEntry.getKey().equals(key))
+		    return true;
+		currEntry = currEntry.getNext();
+	    }
+	    return false;
+
+	case LINEAR_PROBING:
+	    while (removedSpaces.contains(hashCode) || buckets[hashCode] != null && buckets[hashCode].getKey() != null
+		    && !this.buckets[hashCode].key.equals(key)) {
+		hashCode = (hashCode + 1) % this.buckets.length;
+	    }
+	    if (buckets[hashCode] != null) {
+		return true;
+	    }
+	    return false;
+
+	default:
+	    return false;
+	}
+    }
+
+    @Override
+    public boolean containsValue(final V value) {
+
+	switch (this.strategy) {
+	case CHAINING:
+	    for (int i = 0; i < this.buckets.length; i++) {
+		Entry<K, V> currEntry = this.buckets[i];
+
+		while (currEntry != null) {
+		    if (currEntry.getValue() == null && value == null
+			    || currEntry.getKey() != null && currEntry.getValue().equals(value))
+			return true;
+		    currEntry = currEntry.getNext();
+		}
+
+	    }
+	    return false;
+
+	case LINEAR_PROBING:
+	    for (int i = 0; i < this.buckets.length; i++) {
+		if (this.buckets[i] != null) {
+		    if (buckets[i].getValue() == null && value == null
+			    || this.buckets[i].value != null && this.buckets[i].value.equals(value)) {
+			return true;
+		    }
+		}
+	    }
+	    return false;
+	default:
+	    return false;
+	}
+    }
+
+    @Override
+    public int size() {
+	// TODO Auto-generated method stub
+	return this.size;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void clear() {
+	this.size = 0;
+	this.buckets = new Entry[DEFAULT_SIZE];
+
+    }
+
+    private static class Entry<K, V> {
+
+	private Entry<K, V> next;
+	private K key;
+	private V value;
+
+	public Entry(K key, V value) {
+	    super();
+	    this.key = key;
+	    this.value = value;
+	}
+
+	public Entry<K, V> getNext() {
+	    return next;
+	}
+
+	public void setNext(Entry<K, V> next) {
+	    this.next = next;
+	}
+
+	public K getKey() {
+	    return key;
+	}
+
+	public V getValue() {
+	    return value;
+	}
+
+	public void setValue(final V value) {
+	    this.value = value;
+	}
+
+    }
+
+}

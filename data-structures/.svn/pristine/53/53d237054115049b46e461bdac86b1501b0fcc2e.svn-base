@@ -1,0 +1,95 @@
+package com.egtinteractive.data_structures.list;
+
+import java.util.Iterator;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.MyDataProvider;
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class IteratorTests {
+    private static final int ZERO = 0;
+    private int size;
+
+    @DataProvider(name = "getClass")
+    public Object[][] getData() {
+	return MyDataProvider.getListDataProvider();
+    }
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(5000, 8000);
+    }
+
+    @Test(dataProvider = "getClass")
+    public void shouldIterateCorrectly(List<Integer> list) {
+	int[] arr = new int[size];
+	for (int i = ZERO; i < this.size; i++) {
+	    final int num = NumberGenerator.generate(20000);
+	    list.add(num);
+	    arr[i] = num;
+	}
+
+	int[] resultArray = new int[size];
+	int count = 0;
+	for (int i : list) {
+	    resultArray[count++] = i;
+	}
+
+	for (int i = ZERO; i < size; i++) {
+	    Assert.assertEquals(resultArray[i], arr[i]);
+	}
+    }
+
+    @Test(dataProvider = "getClass")
+    public void shouldNotDoAnythingOnAnEmptyList(List<Integer> list) {
+
+	int result = ZERO;
+	for (int i : list) {
+	    result += i;
+	}
+
+	Assert.assertEquals(result, ZERO);
+
+    }
+
+    @Test(dataProvider = "getClass")
+    public void shouldRemoveCorrectly(List<Integer> list) {
+	for (int i = ZERO; i < this.size; i++) {
+	    final int num = NumberGenerator.generate(20000);
+	    list.add(num);
+	}
+	final int expectedResult = list.get(1);
+
+	Iterator iterator = list.iterator();
+
+	iterator.next();
+	iterator.remove();
+	final int actualResult = list.get(ZERO);
+
+	Assert.assertEquals(actualResult, expectedResult);
+
+    }
+
+    @Test(dataProvider = "getClass")
+    public void shouldRemoveAllCorrectly(List<Integer> list) {
+	for (int i = 0; i < 10; i++) {
+	    list.add(i);
+	}
+	Iterator iterator = list.iterator();
+	while(iterator.hasNext()){
+	    iterator.next();
+	    iterator.remove();
+	}
+	Assert.assertEquals(list.size(), 0);
+
+
+
+
+
+    }
+
+}

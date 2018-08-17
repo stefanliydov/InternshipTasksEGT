@@ -1,0 +1,133 @@
+package statemachine;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class StateMachineTests {
+
+    private final VendingMachine machine = new VendingMachine();
+
+    @Test
+    public void machineDoesNotSelectItemOnStandBy() {
+	Assert.assertFalse(machine.selectItem());
+
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotSelectItemOnStandBy")
+    public void machineDoesNotGiveItemOnStandBy() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotSelectItemOnStandBy")
+    public void machineDoesNotGiveMoneyBackOnStandBy() {
+	Assert.assertFalse(machine.returnMoney());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotGiveItemOnStandBy")
+    public void machineDoesNotNeedServiceOnStandBy() {
+	Assert.assertFalse(machine.service());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotNeedServiceOnStandBy")
+    public void machineAcceptsCoinsOnStandBy() {
+	Assert.assertTrue(machine.putCoins());
+    }
+
+    @Test(dependsOnMethods = "machineAcceptsCoinsOnStandBy")
+    public void machineNoLongerAcceptsCoinsOnSelectingItem() {
+	Assert.assertFalse(machine.putCoins());
+    }
+
+    @Test(dependsOnMethods = "machineNoLongerAcceptsCoinsOnSelectingItem")
+    public void machineDoesNotGiveItemOnSelectingItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotGiveItemOnSelectingItem")
+    public void machineDoesNotNeedServiceonSelectingItem() {
+	Assert.assertFalse(machine.service());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotNeedServiceonSelectingItem")
+    public void machineSelectsItem() {
+	Assert.assertTrue(machine.selectItem());
+    }
+
+    @Test(dependsOnMethods = "machineSelectsItem")
+    public void machineDoesNotSelectItemOnTakeItem() {
+	Assert.assertFalse(machine.selectItem());
+    }
+
+    @Test(dependsOnMethods = "machineSelectsItem")
+    public void machineDoesNotReturnMoneyOnTakeItem() {
+	Assert.assertFalse(machine.returnMoney());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotSelectItemOnTakeItem")
+    public void machineDoesNotAcceptCoinsOnTakeItem() {
+	Assert.assertFalse(machine.putCoins());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotAcceptCoinsOnTakeItem")
+    public void machineDoesNotNeedServiceItemOnTakeItem() {
+	Assert.assertFalse(machine.service());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotNeedServiceItemOnTakeItem")
+    public void machineGivesItem() {
+	Assert.assertTrue(machine.takeItem());
+    }
+
+    @Test(dependsOnMethods = "machineGivesItem")
+    public void machineDoesNotNeedServiceOnStandByAgain() {
+	Assert.assertFalse(machine.service());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotNeedServiceOnStandByAgain")
+    public void machineAcceptsMoneyAgain() {
+	Assert.assertTrue(machine.putCoins());
+    }
+
+    @Test(dependsOnMethods = "machineAcceptsMoneyAgain")
+    public void machineDoesNotAcceptCoinsOnService() {
+	Assert.assertTrue(VendingMachine.putInService(machine));
+	Assert.assertFalse(machine.putCoins());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotAcceptCoinsOnService")
+    public void machineDoesNotGiveItemOnService() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotGiveItemOnService")
+    public void machineDoesNotSelectItemOnService() {
+	Assert.assertFalse(machine.selectItem());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotGiveItemOnService")
+    public void machineDoesNotReturnMoneyOnService() {
+	Assert.assertFalse(machine.returnMoney());
+    }
+
+    @Test(dependsOnMethods = "machineDoesNotSelectItemOnService")
+    public void machineIsServicedWhenOnService() {
+	Assert.assertTrue(machine.service());
+    }
+
+    @Test(dependsOnMethods = "machineIsServicedWhenOnService")
+    public void machineIsBackToStandByAndAcceptsMoney() {
+	Assert.assertTrue(machine.putCoins());
+    }
+
+    @Test(dependsOnMethods = "machineIsBackToStandByAndAcceptsMoney")
+    public void machineIsInSelectingAndCanReturnMoney() {
+	Assert.assertTrue(machine.returnMoney());
+    }
+
+    @Test(dependsOnMethods = "machineIsInSelectingAndCanReturnMoney")
+    public void machineIsBackToStandByAndAcceptsMoneySecond() {
+	Assert.assertTrue(machine.putCoins());
+    }
+}

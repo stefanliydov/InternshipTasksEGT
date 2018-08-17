@@ -1,0 +1,205 @@
+package egt.interactive.tic_tac_toe.connection;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+import egt.interactive.tic_tac_toe.states.GameOutcome;
+
+public class ConnectionClass {
+    static final String URL = "jdbc:mysql://localhost:3306/tic_tac_toe?createDatabaseIfNotExist=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    static final String USER = "root";
+    static final String PASSWORD = "stefan12";
+
+    private Connection connection;
+
+    public ConnectionClass() {
+
+    }
+
+    private void createConnection() {
+	this.connection = getConnection();
+    }
+
+    public Connection getConnection() {
+	try {
+	    return DriverManager.getConnection(URL, USER, PASSWORD);
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    public boolean doesPlayerExist(final String name) {
+	return this.getPlayerId(name) != null;
+    }
+
+    public void addPlayer(final String name) {
+	createConnection();
+	final String selectStatement = "INSERT INTO players(name) VALUES ('" + name + "')";
+
+	try (Statement stmt = connection.createStatement()) {
+	    stmt.executeUpdate(selectStatement);
+	    this.connection.close();
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	}
+
+    }
+
+    public void addGameWithNoPlayer(final GameOutcome outcome) {
+	final String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+	final String selectStatement = "INSERT INTO games(date_time, outcome) VALUES ('" + timeStamp + "', '"
+		+ outcome.name() + "')";
+	Statement stmt = null;
+	createConnection();
+
+	try {
+	    stmt = connection.createStatement();
+	    stmt.executeUpdate(selectStatement);
+	    this.connection.close();
+
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    if (stmt != null) {
+		try {
+		    stmt.close();
+		} catch (SQLException e) {
+		}
+	    }
+	    if (connection != null) {
+		try {
+		    connection.close();
+		} catch (SQLException e) {
+		}
+	    }
+	}
+    }
+
+    public void addGameWithPlayer(final String playerName, final GameOutcome outcome) {
+
+	final String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
+
+	final Integer playerId = this.getPlayerId(playerName);
+	final String selectStatement = "INSERT INTO games(player_id, date_time, outcome) VALUES ('" + playerId + "','"
+		+ timeStamp + "', '" + outcome.name() + "')";
+	Statement stmt = null;
+	createConnection();
+
+	try {
+	    stmt = connection.createStatement();
+	    stmt.executeUpdate(selectStatement);
+	    this.connection.close();
+
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    if (stmt != null) {
+		try {
+		    stmt.close();
+		} catch (SQLException e) {
+		}
+	    }
+	    if (connection != null) {
+		try {
+		    connection.close();
+		} catch (SQLException e) {
+		}
+	    }
+	}
+
+    }
+
+    public String getTopThreePlayers() {
+
+	final String selectStatement = "SELECT count(*) as total_wins, p.name  FROM players as p "
+		+ "JOIN games as g  ON p.id = g.player_id " + "WHERE g.outcome = 'PLAYER_WINS' GROUP BY g.player_id "
+		+ "ORDER BY total_wins desc, p.name ASC limit 3";
+	Statement stmt = null;
+	ResultSet rs = null;
+	createConnection();
+
+	try {
+	    stmt = connection.createStatement();
+	    rs = stmt.executeQuery(selectStatement);
+
+	    final StringBuilder sb = new StringBuilder();
+	    sb.append("   Hall of Fame\n");
+	    int count = 1;
+	    if (rs != null) {
+		while (rs.next()) {
+		    sb.append(count++).append(". ")
+			    .append(String.format("%-12s %-12s\n", rs.getString("name"), rs.getString("total_wins")));
+
+		}
+	    }
+	    this.connection.close();
+	    return sb.toString();
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    if (rs != null) {
+		try {
+		    rs.close();
+		} catch (SQLException e) {
+		}
+	    }
+	    if (stmt != null) {
+		try {
+		    stmt.close();
+		} catch (SQLException e) {
+		}
+	    }
+	    if (connection != null) {
+		try {
+		    connection.close();
+		} catch (SQLException e) {
+		}
+	    }
+	}
+
+    }
+
+    private Integer getPlayerId(final String playerName) {
+	final String selectStatement = "SELECT * FROM players WHERE name = '" + playerName + "'";
+	Statement stmt = null;
+	ResultSet rs = null;
+	createConnection();
+
+	try {
+	    stmt = connection.createStatement();
+
+	    rs = stmt.executeQuery(selectStatement);
+	    if (rs.next()) {
+		return Integer.valueOf(rs.getString("id"));
+	    }
+	    this.connection.close();
+	    return null;
+	} catch (SQLException e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    if (rs != null) {
+		try {
+		    rs.close();
+		} catch (SQLException e) {
+		}
+	    }
+	    if (stmt != null) {
+		try {
+		    stmt.close();
+		} catch (SQLException e) {
+		}
+	    }
+	    if (connection != null) {
+		try {
+		    connection.close();
+		} catch (SQLException e) {
+		}
+	    }
+	}
+    }
+}

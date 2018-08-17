@@ -1,0 +1,68 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+
+public class ExceptionsTests {
+    VendingMachine machine = new VendingMachine();
+
+    @Test
+    public void machineShouldGoToServiceifNegativeMoneyIsPassed()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	machine.putCoins("-2");
+
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	Assert.assertEquals(state, States.SERVICE);
+    }
+
+    @Test
+    public void machineShouldGoToServiceifZEROAmountMoneyIsPassed()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	machine.putCoins("0");
+
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	Assert.assertEquals(state, States.SERVICE);
+    }
+
+    @Test
+    public void machineShouldGoToServiceifInvalidNumberIsPassedMoneyIsPassed()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	machine.putCoins("Adasdaw");
+
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	Assert.assertEquals(state, States.SERVICE);
+            }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void addingProductWithNegativePriceShouldThrowException() {
+	machine.addProduct("Dummy", new BigDecimal("-1"), 6);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void addingProductWithNegativeQuantityShouldThrowException() {
+	machine.addProduct("Dummy", new BigDecimal("2"), -1);
+    }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void addingProductWithZeroQuantityShouldThrowException() {
+	machine.addProduct("Dummy", new BigDecimal("2"), 0);
+    }
+}

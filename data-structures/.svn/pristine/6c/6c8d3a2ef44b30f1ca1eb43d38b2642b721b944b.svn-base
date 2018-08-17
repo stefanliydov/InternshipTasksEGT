@@ -1,0 +1,53 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class GetTests {
+    private static final int ONE = 1;
+    Map<Character, Integer> map;
+    private int size;
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(100, 300);
+    }
+
+    @BeforeMethod
+    public void mapReset() {
+	this.map = new MyMap<>();
+    }
+
+    @Test
+    public void getShouldReturnCorrectValueForMultipleChainderElements() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	for (int i = ONE; i < this.size; i++) {
+	    final int result = this.map.get((char) i);
+	    Assert.assertEquals(result, i);
+	}
+
+    }
+
+    @Test
+    public void getShouldReturnNullOnAnEmptyMap() {
+	Assert.assertNull(this.map.get((char)NumberGenerator.generate(30)));
+    }
+
+    @Test
+    public void getShouldReturnNullIfElementIsNotPresent() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	
+	for(int i = this.size +ONE; i<this.size*2;i++){
+	Assert.assertNull(this.map.get((char)i));
+	}
+    }
+
+}

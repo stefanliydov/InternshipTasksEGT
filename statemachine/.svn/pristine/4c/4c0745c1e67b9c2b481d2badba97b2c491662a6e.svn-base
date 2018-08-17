@@ -1,0 +1,36 @@
+package statemachine;
+
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class ExceptionsTests {
+    VendingMachine machine = new VendingMachine();
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void machineShouldGoThrowExcpetionifNegativeMoneyIsPassed() {
+	machine.putCoins(-2L);
+
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void machineShouldThrowExceptionifZEROAmountMoneyIsPassed() {
+	machine.putCoins(0L);
+
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void addingProductWithNegativePriceShouldThrowException() {
+	machine.addProduct("Dummy", -1L, 6);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void addingProductWithNegativeQuantityShouldThrowException() {
+	machine.addProduct("Dummy", 2L, -1);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void addingProductWithZeroQuantityShouldThrowException() {
+	machine.addProduct("Dummy", 2L, 0);
+    }
+}

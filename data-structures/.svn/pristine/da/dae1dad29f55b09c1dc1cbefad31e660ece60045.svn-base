@@ -1,0 +1,240 @@
+package com.egtinteractive.data_structures.list;
+
+import java.util.Iterator;
+
+public class LinkedList<T> implements List<T> {
+
+    private Node head;
+    private int size;
+
+    public LinkedList() {
+	this.size = 0;
+    }
+
+    @Override
+    public T get(int index) {
+	if (this.isOutOfBounds(index)) {
+	    throw new IndexOutOfBoundsException();
+	}
+	Node currNode = this.head;
+	for (int i = 0; i < index; i++) {
+	    currNode = currNode.getNext();
+	}
+
+	return currNode.getValue();
+    }
+
+    @Override
+    public void add(T element) {
+	if (this.head == null) {
+	    this.head = new Node(element);
+	    size++;
+	    return;
+	}
+	Node newNode = new Node(element);
+	Node currNode = this.head;
+
+	while (currNode.getNext() != null) {
+	    currNode = currNode.getNext();
+	}
+	currNode.setNext(newNode);
+	size++;
+    }
+
+    @Override
+    public void add(int index, T element) {
+	if (index < 0 || index > size) {
+	    throw new IndexOutOfBoundsException();
+	}
+
+	Node newNode = new Node(element);
+	Node currNode = this.head;
+	if (index == 0) {
+	    newNode.setNext(this.head);
+	    this.head = newNode;
+	    size++;
+	    return;
+	}
+	for (int i = 0; i < index - 1; i++) {
+	    currNode = currNode.getNext();
+	}
+	final Node nextNode = currNode.getNext();
+	currNode.setNext(newNode);
+	newNode.setNext(nextNode);
+	size++;
+
+    }
+
+    @Override
+    public void set(int index, T element) {
+	if (this.isOutOfBounds(index)) {
+	    throw new IndexOutOfBoundsException();
+	}
+	Node currNode = this.head;
+
+	for (int i = 0; i < index; i++) {
+	    currNode = currNode.getNext();
+	}
+
+	currNode.setValue(element);
+    }
+
+    @Override
+    public boolean remove(T element) {
+	if (this.head == null) {
+	    return false;
+	}
+	Node parentNode = this.head;
+	Node currNode = parentNode.getNext();
+	if (parentNode.getValue() != null && parentNode.getValue().equals(element)) {
+	    this.head = currNode;
+	    size--;
+	    return true;
+	}
+
+	while (currNode != null) {
+	    if (parentNode.getValue() != null && currNode.getValue() != null && currNode.getValue().equals(element)) {
+		parentNode.setNext(currNode.getNext());
+		size--;
+		return true;
+	    }
+
+	    parentNode = currNode;
+	    currNode = currNode.getNext();
+	}
+
+	return false;
+    }
+
+    @Override
+    public boolean remove(int index) {
+	if (this.isOutOfBounds(index)) {
+	    throw new IndexOutOfBoundsException();
+	}
+	if (index == 0) {
+	    this.head = this.head.getNext();
+	    size--;
+	    return true;
+	}
+
+	Node currNode = this.head;
+	for (int i = 0; i < index - 1; i++) {
+	    currNode = currNode.getNext();
+	}
+	final Node nextNode = currNode.getNext().getNext();
+	currNode.setNext(nextNode);
+	size--;
+
+	return true;
+    }
+
+    @Override
+    public boolean contains(T O) {
+	Node currNode = this.head;
+	if (currNode == null) {
+	    return false;
+	}
+	while ((currNode != null)) {
+
+	    if (currNode.getValue() != null && currNode.getValue().equals(O)) {
+		return true;
+	    }
+
+	    currNode = currNode.getNext();
+	}
+	return false;
+    }
+
+    @Override
+    public int indexOf(T element) {
+
+	Node currNode = this.head;
+	for (int i = 0; i < size; i++) {
+	    if (currNode.getValue() != null && currNode.getValue().equals(element)) {
+		return i;
+	    }
+	    currNode = currNode.getNext();
+	}
+
+	return -1;
+    }
+
+    @Override
+    public int size() {
+	return this.size;
+    }
+
+    @Override
+    public void clear() {
+	this.size = 0;
+	this.head = null;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+	return new CustomIterator();
+    }
+
+    private boolean isOutOfBounds(int index) {
+	return (index < 0 || index >= size);
+    }
+
+    private class CustomIterator implements Iterator<T> {
+
+	private Node currNode;
+
+	public CustomIterator() {
+	    currNode = new Node(null);
+	    currNode.setNext(head);
+
+	}
+
+	@Override
+	public boolean hasNext() {
+
+	    return currNode.next != null;
+	}
+
+	@Override
+	public T next() {
+	    currNode = currNode.getNext();
+	    return currNode.getValue();
+	}
+
+	@Override
+	public void remove() {
+	    if (currNode.value == null) {
+		throw new IllegalStateException();
+	    }
+	    LinkedList.this.remove(currNode.value);
+	}
+
+    }
+
+    private class Node {
+	private T value;
+	private Node next;
+
+	public Node(T value) {
+	    this.value = value;
+	}
+
+	public T getValue() {
+	    return value;
+	}
+
+	public void setValue(T value) {
+	    this.value = value;
+	}
+
+	public Node getNext() {
+	    return next;
+	}
+
+	public void setNext(Node next) {
+	    this.next = next;
+	}
+
+    }
+
+}

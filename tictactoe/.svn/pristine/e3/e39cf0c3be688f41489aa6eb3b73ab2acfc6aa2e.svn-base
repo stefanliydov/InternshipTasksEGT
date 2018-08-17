@@ -1,0 +1,130 @@
+package egt.interactive.tic_tac_toe;
+
+public enum States {
+
+    STAND_BY {
+	@Override
+	public boolean putCoins(final StateMachineGame game, final int coins) {
+	    if (!isMoneyValid(coins))
+		return false;
+	    game.insertCash(coins);
+	    if (game.isMoneyEnough()) {
+		game.setState(GAME_IN_PROGRESS);
+		game.beginGame();
+	    } else {
+		game.askForMoreMoney();
+	    }
+	    return true;
+	}
+
+	private boolean isMoneyValid(final int coins) {
+	    return coins > 0;
+	}
+
+	@Override
+	public boolean playMove(final StateMachineGame game, final int move) {
+
+	    return false;
+	}
+
+	@Override
+	public boolean putName(final StateMachineGame game) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(StateMachineGame game) {
+	    return true;
+	}
+    },
+    GAME_IN_PROGRESS {
+	@Override
+	public boolean putCoins(final StateMachineGame game, final int coins) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean playMove(final StateMachineGame game, final int move) {
+	    if (!isMoveValid(move) || !game.isFieldFree(move)) {
+		game.invalidField();
+		return false;
+	    }
+	    game.addPlayerMove(move);
+	    if (game.hasPlayerWon(move)) {
+		game.setState(END_GAME);
+		game.drawBoard();
+		game.getOutCome().finishGame(game);
+		return true;
+	    }
+
+	    if (game.isGameDraw()) {
+		game.setState(END_GAME);
+		game.drawBoard();
+		game.getOutCome().finishGame(game);
+		return true;
+	    }
+
+	    final int aIMove = game.addAIMove(move);
+	    game.drawBoard();
+	    if (game.isGameOver(move, aIMove)) {
+		game.setState(END_GAME);
+		game.getOutCome().finishGame(game);
+	    }
+
+	    return true;
+	}
+
+	private boolean isMoveValid(final int move) {
+	    return move >= 0 && move < 9;
+	}
+
+	@Override
+	public boolean putName(final StateMachineGame game) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(StateMachineGame game) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+    },
+    END_GAME {
+
+	@Override
+	public boolean putCoins(final StateMachineGame game, final int coins) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean playMove(final StateMachineGame game, final int move) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean putName(final StateMachineGame game) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(StateMachineGame game) {
+	    // TODO Auto-generated method stub
+	    return false;
+	}
+    };
+
+    public abstract boolean putCoins(final StateMachineGame game, final int coins);
+
+    public abstract boolean playMove(final StateMachineGame game, final int move);
+
+    public abstract boolean putName(final StateMachineGame game);
+
+    public abstract boolean returnMoney(final StateMachineGame game);
+
+}

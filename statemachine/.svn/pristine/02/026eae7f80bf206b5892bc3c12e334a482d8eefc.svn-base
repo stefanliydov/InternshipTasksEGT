@@ -1,0 +1,44 @@
+package statemachine;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+import resources.MachineLoader;
+
+public class AddProductTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+	MachineLoader.loadMachine(machine);
+    }
+
+    @Test
+    public void addItemActuallyAddsItem() {
+	final int oldSize = machine.getItemsCount();
+	machine.addProduct("Dummy", ThreadLocalRandom.current().nextLong(50, 400),
+		ThreadLocalRandom.current().nextInt(2, 10));
+	final int result = machine.getItemsCount();
+	Assert.assertEquals(result, oldSize + 1);
+    }
+
+    @Test
+    public void addMaxItemsShouldStopAddingItems() {
+	while (true) {
+	    if (!machine.addProduct(String.valueOf(ThreadLocalRandom.current().nextInt()),
+		    ThreadLocalRandom.current().nextLong(50, 400), ThreadLocalRandom.current().nextInt(2, 10))) {
+		break;
+	    }
+	}
+	final int size = machine.getItemsCount();
+	final int targetSize = 16;
+	Assert.assertEquals(size, targetSize);
+    }
+
+}

@@ -1,0 +1,15 @@
+package egt.interactive.testing_framework.Test;
+
+import egt.interactive.testing_framework.enums.TestingAnnotations;
+
+public class MyAnnotations extends Test {
+
+    private final static TestingAnnotations ANNOTATIONS = TestingAnnotations.MY_ANNOTATIONS;
+
+    public MyAnnotations() {
+	super(ANNOTATIONS.getTestAnnotation(), ANNOTATIONS.getBeforeTestAnnotation(), ANNOTATIONS.getAfterAnnotation(),
+		ANNOTATIONS.getDataProviderAnnotation());
+
+    }
+
+}

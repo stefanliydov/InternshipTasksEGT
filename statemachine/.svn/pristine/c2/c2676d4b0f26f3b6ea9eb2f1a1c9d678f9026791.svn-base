@@ -1,0 +1,44 @@
+package statemachine;
+
+import java.math.BigDecimal;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class AddProductTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+    }
+
+    @Test
+    public void addItemActuallyAddsItem() {
+	final int oldSize = machine.getItemsCount();
+	machine.addProduct("Dummy", new BigDecimal(ThreadLocalRandom.current().nextDouble(2, 3)),
+		ThreadLocalRandom.current().nextInt(2, 10));
+	final int result = machine.getItemsCount();
+	Assert.assertEquals(result, oldSize + 1);
+    }
+
+    @Test
+    public void addMaxItemsShouldStopAddingItems() {
+	while (true) {
+	    if (!machine.addProduct(String.valueOf(ThreadLocalRandom.current().nextInt()),
+		    new BigDecimal(ThreadLocalRandom.current().nextDouble(2, 3)),
+		    ThreadLocalRandom.current().nextInt(2, 10))) {
+		break;
+	    }
+	}
+	final int size = machine.getItemsCount();
+	final int targetSize = 16;
+	Assert.assertEquals(size, targetSize);
+    }
+
+}

@@ -1,0 +1,55 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class ContainsKeyTests {
+
+    private static final int ONE = 1;
+    Map<Character, Integer> map;
+    private int size;
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(150, 200);
+    }
+
+    @BeforeMethod
+    public void mapReset() {
+	this.map = new MyMap<>();
+    }
+
+    @Test
+    public void containsShouldReturnTrueWhenMappingExists() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+	for (int i = ONE; i < this.size; i++) {
+	    final boolean result = this.map.containsKey((char) i);
+	    Assert.assertTrue(result);
+	}
+    }
+
+    @Test
+    public void containsShouldReturnFalseIfMappingDoesNotExists() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put((char) i, i);
+	}
+
+	final int secondSize = NumberGenerator.generate(300, 400);
+	for (int i = this.size; i < secondSize; i++) {
+	    final boolean result = this.map.containsKey((char) i);
+	    Assert.assertFalse(result);
+	}
+    }
+
+    @Test
+    public void containsShouldReturnFalseInAnEmptyMap() {
+	Assert.assertFalse(this.map.containsKey((char) NumberGenerator.generate(30)));
+    }
+
+}

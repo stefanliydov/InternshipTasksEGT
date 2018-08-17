@@ -1,0 +1,135 @@
+package egt.interactive.statemachine;
+
+enum States {
+    STAND_BY {
+
+	@Override
+	public boolean putCoins(final VendingMachine machine) {
+	    machine.setState(States.SELECTING_ITEM);
+	    return true;
+	}
+
+	@Override
+	public boolean selectItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean takeItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean service(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(VendingMachine machine) {
+	    return false;
+	}
+
+    },
+    SELECTING_ITEM {
+
+	@Override
+	public boolean putCoins(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean selectItem(final VendingMachine machine) {
+	    machine.makeItem();
+	    machine.setState(States.TAKE_ITEM);
+	    return true;
+	}
+
+	@Override
+	public boolean takeItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean service(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(VendingMachine machine) {
+	    machine.setState(States.STAND_BY);
+	    return true;
+	}
+
+    },
+
+    TAKE_ITEM {
+
+	@Override
+	public boolean putCoins(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean selectItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean takeItem(final VendingMachine machine) {
+	    machine.setState(States.STAND_BY);
+	    return true;
+	}
+
+	@Override
+	public boolean service(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(VendingMachine machine) {
+	    return false;
+	}
+
+    },
+
+    SERVICE {
+
+	@Override
+	public boolean putCoins(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean selectItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean takeItem(final VendingMachine machine) {
+	    return false;
+	}
+
+	@Override
+	public boolean service(final VendingMachine machine) {
+	    machine.setState(States.STAND_BY);
+	    return true;
+	}
+
+	@Override
+	public boolean returnMoney(VendingMachine machine) {
+	    return false;
+	}
+
+    };
+
+    public abstract boolean putCoins(final VendingMachine machine);
+
+    public abstract boolean selectItem(final VendingMachine machine);
+
+    public abstract boolean takeItem(final VendingMachine machine);
+
+    public abstract boolean service(final VendingMachine machine);
+
+    public abstract boolean returnMoney(final VendingMachine machine);
+
+}

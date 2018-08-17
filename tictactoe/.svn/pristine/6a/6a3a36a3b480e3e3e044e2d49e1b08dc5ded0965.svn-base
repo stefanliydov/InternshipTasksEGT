@@ -1,0 +1,269 @@
+package egt.interactive.tic_tac_toe.game;
+
+import java.util.List;
+
+import egt.interactive.tic_tac_toe.player_points.PlayerPoints;
+
+public enum States {
+
+    STAND_BY {
+	private final static int NEEDED_MONEY = 10;
+
+	@Override
+	public boolean putCoins(final GameMachine game, final int coins) {
+	    if (!isMoneyValid(coins)) {
+		return false;
+	    }
+
+	    game.insertCash(coins);
+	    if (isMoneyEnough(game)) {
+		game.setState(GAME_IN_PROGRESS);
+		game.takeMoney(NEEDED_MONEY);
+		drawBoard(game);
+	    } else {
+		askForMoreMoney(game);
+	    }
+	    return true;
+	}
+
+	@Override
+	public boolean playMove(final GameMachine game, final int move) {
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(final GameMachine game) {
+	    return true;
+	}
+
+	@Override
+	public boolean endGame(final GameMachine game) {
+	    return false;
+	}
+
+	private void drawBoard(final GameMachine game) {
+	    game.getDrawer().drawBoard(game.getBoard());
+	}
+
+	private void askForMoreMoney(final GameMachine game) {
+	    final int moneyToAdd = NEEDED_MONEY - game.getCoins();
+	    game.getIO().write(String.format("Please insert %d more", moneyToAdd));
+	}
+
+	private boolean isMoneyValid(final int coins) {
+	    return coins > 0;
+	}
+
+	public boolean isMoneyEnough(final GameMachine game) {
+	    return game.getCoins() >= NEEDED_MONEY;
+	}
+    },
+    GAME_IN_PROGRESS {
+	private static final int SIZE = 3;
+	private final static String PLAYER_SIGN = "X";
+	private final static String AI_SIGN = "O";
+	private final static String INVALID_MOVE = "The move is not valid, please choose a different position!";
+
+	@Override
+	public boolean putCoins(final GameMachine game, final int coins) {
+	    return false;
+	}
+
+	@Override
+	public boolean playMove(final GameMachine game, final int move) {
+	    if (!isMoveValid(move) || !game.isFieldFree(move)) {
+		invalidField(game);
+		return false;
+	    }
+
+	    addPlayerMove(move, game);
+	    if (hasPlayerWon(move, game)) {
+		drawBoard(game);
+		finishGame(game);
+		return true;
+	    }
+
+	    if (isGameDraw(game)) {
+		drawBoard(game);
+		finishGame(game);
+		return true;
+	    }
+
+	    final Integer aIMove = addAIMove(game);
+	    drawBoard(game);
+	    if (isGameOver(aIMove, game)) {
+		finishGame(game);
+	    }
+
+	    return true;
+	}
+
+	@Override
+	public boolean returnMoney(final GameMachine game) {
+	    return false;
+	}
+
+	@Override
+	public boolean endGame(final GameMachine game) {
+	    return false;
+	}
+
+	public void addPlayerMove(final int move, final GameMachine game) {
+	    game.getBoard().addMove(move, PLAYER_SIGN);
+	}
+
+	private void finishGame(final GameMachine game) {
+	    game.getOutCome().finishGame(game);
+	    game.setState(END_GAME);
+	}
+
+	private boolean isMoveValid(final int move) {
+	    return move >= 0 && move < 9;
+	}
+
+	private void drawBoard(final GameMachine game) {
+	    game.getDrawer().drawBoard(game.getBoard());
+	}
+
+	private boolean hasPlayerWon(final int move, final GameMachine game) {
+	    if (isWinner(move, game)) {
+		// player wins
+		game.setOutcome(GameOutcome.PLAYER_WINS);
+		return true;
+	    }
+	    return false;
+	}
+
+	private boolean isGameDraw(final GameMachine game) {
+	    if (game.getBoard().isFull()) {
+		// game is draw
+		game.setOutcome(GameOutcome.DRAW);
+		return true;
+	    }
+	    return false;
+	}
+
+	private boolean isGameOver(final int aIMove, final GameMachine game) {
+	    if (isWinner(aIMove, game)) {
+		// aiWins
+		game.setOutcome(GameOutcome.AI_WINS);
+		return true;
+	    }
+	    return false;
+	}
+
+	private boolean isWinner(final int move, final GameMachine game) {
+	    String[][] fields = game.getBoard().getAllFields();
+	    final int x = move / SIZE;
+	    final int y = move % SIZE;
+	    final String sign = fields[x][y];
+	    return this.checkCol(fields, x, sign, move) || this.checkRow(fields, y, sign, move)
+		    || this.checkDiag(fields, x, y, sign, move) || this.checkAntiDiag(fields, x, y, sign, move);
+	}
+
+	private boolean checkAntiDiag(final String[][] fields, final int x, final int y, final String sign,
+		final int move) {
+	    if (x + y == SIZE - 1) {
+		for (int i = 0; i < SIZE; i++) {
+		    if (fields[i][(SIZE - 1) - i] != sign) {
+			return false;
+		    }
+		}
+		return true;
+	    }
+	    return false;
+	}
+
+	private boolean checkDiag(final String[][] fields, final int x, final int y, final String sign,
+		final int move) {
+	    if (x == y) {
+		for (int i = 0; i < SIZE; i++) {
+		    if (fields[i][i] != sign) {
+			return false;
+		    }
+		}
+		return true;
+	    }
+	    return false;
+	}
+
+	private boolean checkRow(final String[][] fields, final int y, final String sign, final int move) {
+	    for (int i = 0; i < SIZE; i++) {
+		if (fields[i][y] != sign) {
+		    return false;
+		}
+	    }
+	    return true;
+	}
+
+	private boolean checkCol(final String[][] fields, final int x, final String sign, final int move) {
+	    for (int i = 0; i < SIZE; i++) {
+		if (fields[x][i] != sign) {
+		    return false;
+		}
+	    }
+	    return true;
+	}
+
+	private Integer addAIMove(final GameMachine game) {
+	    final Integer aIMove = game.getAi().playAIMove(game.getBoard());
+	    if (aIMove != null) {
+		game.getBoard().addMove(aIMove, AI_SIGN);
+	    }
+	    return aIMove;
+	}
+
+	private void invalidField(final GameMachine game) {
+	    game.getIO().write(INVALID_MOVE);
+
+	}
+    },
+
+    END_GAME {
+	@Override
+	public boolean putCoins(final GameMachine game, final int coins) {
+	    return false;
+	}
+
+	@Override
+	public boolean playMove(final GameMachine game, final int move) {
+	    return false;
+	}
+
+	@Override
+	public boolean returnMoney(final GameMachine game) {
+	    return false;
+	}
+
+	@Override
+	public boolean endGame(final GameMachine game) {
+	    printTopThreePlayers(game);
+	    game.setState(STAND_BY);
+	    return true;
+	}
+
+	private void printTopThreePlayers(final GameMachine game) {
+	    final List<PlayerPoints> topThreePlayers = game.getConnection().getTopThreePlayers();
+	    final StringBuilder sb = new StringBuilder();
+	    sb.append("   Hall of Fame\n");
+	    int count = 1;
+	    for (PlayerPoints pp : topThreePlayers) {
+
+		sb.append(count++).append(". ").append(String.format("%-12s %-12s\n", pp.getName(), pp.getPoints()));
+
+	    }
+
+	    game.getIO().write(sb.toString());
+
+	}
+    };
+
+    public abstract boolean putCoins(final GameMachine game, final int coins);
+
+    public abstract boolean playMove(final GameMachine game, final int move);
+
+    public abstract boolean returnMoney(final GameMachine game);
+
+    public abstract boolean endGame(final GameMachine game);
+
+}

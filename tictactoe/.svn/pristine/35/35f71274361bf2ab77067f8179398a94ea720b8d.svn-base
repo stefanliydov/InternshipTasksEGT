@@ -1,0 +1,25 @@
+package egt.interactive.tic_tac_toe;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.game.ArcadeGame;
+import egt.interactive.tic_tac_toe.resources.TicTacToeFactory;
+
+public class EndGameMethodTests {
+
+    private ArcadeGame game;
+
+    @Test
+    public void endGameShouldNotBeValidAtStandBy() {
+	game = TicTacToeFactory.createNewTicTacToeGame();
+	Assert.assertFalse(game.endGame());
+    }
+
+    @Test
+    public void endGameShouldNotBeValidWhileGameIsGoing() {
+	game = TicTacToeFactory.createNewPaidTicTacToeGame();
+	Assert.assertFalse(game.endGame());
+    }
+
+}

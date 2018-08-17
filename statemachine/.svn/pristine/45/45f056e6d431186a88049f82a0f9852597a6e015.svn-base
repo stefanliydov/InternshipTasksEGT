@@ -1,0 +1,66 @@
+package egt.interactive.statemachine.inventory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import egt.interactive.statemachine.product.Product;
+
+public final class Inventory {
+    private static final int INVENTORY_SIZE = 16;
+    private final Map<Product, Integer> products;
+
+    public Inventory() {
+	this.products = new HashMap<>();
+    }
+
+    public boolean addProduct(final String name, final Long price, final int quantity) {
+	if (quantity <= 0) {
+	    throw new IllegalArgumentException("Quantity of new product cannot be negative or zero!");
+	}
+	if (this.products.size() == INVENTORY_SIZE) {
+	    return false;
+	} else {
+	    products.put(new Product(name, price), quantity);
+	    return true;
+	}
+    }
+
+    public Product getProduct(final String name) {
+	for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+	    if (entry.getKey().getName().equals(name)) {
+		return entry.getKey();
+	    }
+	}
+	return null;
+    }
+
+    public void reArrangeItems() {
+	this.products.entrySet().removeIf(e -> e.getValue() <= 0);
+    }
+
+    public int getItemsCount() {
+	return this.products.size();
+    }
+
+    public void buyOne(Product product) {
+	products.put(product, products.get(product) - 1);
+	
+    }
+
+    public int getProductQuantity(Product product) {
+	return this.products.get(product);
+    }
+
+    @Override
+    public String toString() {
+	final StringBuilder sb = new StringBuilder();
+	sb.append("Items available: ").append(System.lineSeparator());
+	int count = 1;
+	for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+	    sb.append(count++).append(entry.getKey()).append(entry.getValue()).append(System.lineSeparator());
+	}
+	sb.append("Select the item you want by pressing the name of the product!").append(System.lineSeparator());
+	return sb.toString();
+    }
+
+}

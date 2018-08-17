@@ -1,0 +1,132 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import resources.MachineLoader;
+
+public class ComplexTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+	MachineLoader.loadMachine(machine);
+    }
+
+    @Test
+    public void aLotOfDifferentPurchasesShouldAddToMachineMoney()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+	Long moneyCollected = 0L;
+
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 800));
+	if (machine.selectItem("Kit-Kat")) {
+	    moneyCollected += machine.getItemPrice("Kit-Kat");
+	    machine.takeItem();
+	}
+
+	if (machine.selectItem("Kit-Kat")) {
+	    moneyCollected += machine.getItemPrice("Kit-Kat");
+	    machine.takeItem();
+	}
+	machine.returnMoney();
+	Assert.assertTrue(machineIsInStandBy());
+
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 700));
+	machine.returnMoney();
+
+	Assert.assertTrue(machineIsInStandBy());
+
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 600));
+	if (machine.selectItem("Coca-Cola")) {
+	    moneyCollected += machine.getItemPrice("Coca-Cola");
+	}
+	;
+	machine.takeItem();
+	if (machine.selectItem("Snickers")) {
+	    moneyCollected += machine.getItemPrice("Snickers");
+	    machine.takeItem();
+	}
+
+	Long totalMoney = machine.getTotalMoney();
+
+	Assert.assertEquals(totalMoney, moneyCollected);
+
+    }
+
+    @Test
+    public void aLotOfDifferentOperationsAndThenErrorShouldStillHaveTotalMoney() {
+	final String[] names = new String[] { "Croissant", "Coca-Cola", "Kit-Kat", "Sprite", "Snickers", "Chips",
+		"Gummy Bears" };
+	Long moneyCollected = 0L;
+	machine.putCoins(ThreadLocalRandom.current().nextLong(20, 40));
+	final int count = ThreadLocalRandom.current().nextInt(10, 20);
+	for (int i = 0; i < count; i++) {
+	    final int id = ThreadLocalRandom.current().nextInt(7);
+	    if (machine.selectItem(names[id])) {
+		moneyCollected += machine.getItemPrice(names[id]);
+		machine.takeItem();
+	    }
+	}
+
+	machine.service();
+
+	Long totalMoney = machine.getTotalMoney();
+
+	Assert.assertEquals(totalMoney, moneyCollected);
+    }
+
+    @Test
+    public void addingNewItemThenBuyingAllOfItShouldRemoveIt() {
+	VendingMachine machine = new VendingMachine();
+	final int count = ThreadLocalRandom.current().nextInt(5, 30);
+
+	machine.addProduct("Milka", 100L, count);
+	machine.putCoins(ThreadLocalRandom.current().nextLong(10000, 20000));
+	for (int i = 0; i < count; i++) {
+	    Assert.assertTrue(machine.selectItem("Milka"));
+	    machine.takeItem();
+	}
+
+	Assert.assertFalse(machine.selectItem("Kit-Kat"));
+    }
+
+    @Test
+    public void buyAllProducts() {
+	final int count = machine.getItemsCount();
+	machine.putCoins(ThreadLocalRandom.current().nextLong(45000, 50000));
+	final String[] names = new String[] { "Croissant", "Coca-Cola", "Kit-Kat", "Sprite", "Snickers", "Chips",
+		"Gummy Bears" };
+	boolean found = true;
+	while (found) {
+	    found = false;
+	    for (int i = 0; i < count; i++) {
+		if (machine.selectItem(names[i])) {
+		    found = true;
+		}
+		machine.takeItem();
+	    }
+	}
+	System.out.println(machine.returnMoney());
+	Assert.assertEquals(machine.getItemsCount(), 0);
+    }
+
+    private boolean machineIsInStandBy()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	return state.equals(States.STAND_BY);
+    }
+
+}

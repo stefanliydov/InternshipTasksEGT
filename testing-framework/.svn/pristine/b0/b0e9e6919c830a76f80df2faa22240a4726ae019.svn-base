@@ -1,0 +1,55 @@
+package egt.interactive.testing_framework;
+
+import java.util.Objects;
+
+import egt.interactive.testing_framework.exceptions.ClaimError;
+
+public class Claim {
+
+    public static <T> void claimEquals(T actual, T expected) {
+	if (actual.equals(expected)) {
+	    success();
+	} else {
+	    fail();
+	}
+    }
+
+    public static void claimTrue(boolean condition) {
+	if (condition) {
+	    success();
+	} else {
+	    fail();
+	}
+    }
+
+    public static void claimFalse(boolean condition) {
+	if (!condition) {
+	    success();
+	} else {
+	    fail();
+	}
+    }
+
+    public static <T> void claimNull(T object) {
+	if (Objects.isNull(object)) {
+	    success();
+	} else {
+	    fail();
+	}
+    }
+
+
+    private static void success() {
+	// TODO Auto-generated method stub
+
+    }
+
+    public static void fail(String message) {
+	throw new ClaimError(message);
+    }
+
+    /** Fails a test with no message. */
+    public static void fail() {
+	fail(null);
+    }
+}

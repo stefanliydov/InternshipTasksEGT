@@ -1,0 +1,94 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import resources.MachineLoader;
+
+public class TakeItemStateTests {
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void addSomeCashInMachine() {
+	machine = new VendingMachine();
+	MachineLoader.loadMachine(machine);
+	machine.putCoins(500L);
+	machine.addProduct("Dummy", 50L, 1);
+	machine.selectItem("Kit-Kat");
+    }
+
+    @Test
+    public void machineDoesEnterServiceIfNeededAndReturnsMoney() {
+	Assert.assertTrue(machine.service());
+	Assert.assertTrue(machine.service());
+	final long result = machine.getCoins();
+	Assert.assertEquals(result, 0L);
+    }
+
+    @Test
+    public void machineDoesNotAcceptCoins() {
+	Assert.assertFalse(machine.putCoins(ThreadLocalRandom.current().nextLong(5)));
+    }
+
+    @Test
+    public void machineDoesNotSelectItem() {
+	Assert.assertFalse(machine.selectItem("Kit-Kat"));
+    }
+
+    @Test
+    public void machineGivesCustomerItem() {
+	Assert.assertTrue(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldNotLetYouAddProductsWhileItsWorking() {
+	Assert.assertFalse(machine.addProduct("dummyProduct", ThreadLocalRandom.current().nextLong(10, 15),
+		ThreadLocalRandom.current().nextInt(2, 5)));
+    }
+
+    @Test
+    public void machineDoesNotGiveMoneyBack() {
+	Assert.assertNull(machine.returnMoney());
+    }
+
+    @Test
+    public void machineGoesBackToSelectingStateIfThereAreMoneyLeftAfterTakingItem()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+	machine.takeItem();
+
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+
+	States state = (States) field.get(machine);
+	Assert.assertEquals(state, States.SELECTING_ITEM);
+    }
+
+    @Test
+    public void machineChangesStateToStandByIfMoneyIsZeroAfterTakingItem()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	machine.takeItem();
+	machine.returnMoney();
+	final long cost = ThreadLocalRandom.current().nextLong(500, 1000);
+	machine.addProduct("Dummy", cost, 1);
+	machine.putCoins(cost);
+
+	machine.selectItem("Dummy");
+	Assert.assertTrue(machine.takeItem());
+
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	Assert.assertEquals(state, States.STAND_BY);
+    }
+
+}

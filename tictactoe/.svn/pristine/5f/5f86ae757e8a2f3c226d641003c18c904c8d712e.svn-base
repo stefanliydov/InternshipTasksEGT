@@ -1,0 +1,47 @@
+package egt.interactive.tic_tac_toe;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.game.ArcadeGame;
+import egt.interactive.tic_tac_toe.resources.RandomNumberGenerator;
+import egt.interactive.tic_tac_toe.resources.TicTacToeFactory;
+import egt.interactive.tic_tac_toe.states.States;
+
+public class EndGameTests {
+
+    private ArcadeGame game;
+
+    @BeforeMethod
+    public void setAndPlayGame() {
+	this.game = TicTacToeFactory.createNewPaidTicTacToeGame();
+	while (game.getState() != States.END_GAME) {
+	    game.playMove(RandomNumberGenerator.generate(0, 9));
+	}
+
+    }
+
+    @Test
+    public void gameShouldNotReturnMoneyAtEndGame() {
+	Assert.assertEquals(game.returnMoney(), 0);
+    }
+
+    @Test
+    public void gameShouldNotPlayMove() {
+	Assert.assertFalse(game.playMove(RandomNumberGenerator.generate(0, 9)));
+    }
+
+    @Test
+    public void gameShouldNotAcceptCoinsAtEndGame() {
+	final int amount = RandomNumberGenerator.generate(0, 9);
+	Assert.assertEquals(game.putCoins(amount), amount);
+    }
+
+    @Test
+    public void gameShouldGoBackToStandByAfterEndIsCalled() {
+	Assert.assertEquals(game.getState(), States.END_GAME);
+	Assert.assertTrue(game.endGame());
+	Assert.assertEquals(game.getState(), States.STAND_BY);
+    }
+}

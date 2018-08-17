@@ -1,0 +1,28 @@
+package egt.interactive.tic_tac_toe.drawer;
+
+import egt.interactive.tic_tac_toe.board.Board;
+import egt.interactive.tic_tac_toe.io.IO;
+
+public class TicTacToeBoardDrawer implements BoardDrawer {
+
+    private final IO io;
+
+    public TicTacToeBoardDrawer(final IO io) {
+	this.io = io;
+    }
+
+    @Override
+    public void drawBoard(final Board board) {
+	String[][] fields = board.getAllFields();
+	StringBuilder sb = new StringBuilder();
+	final int size = fields.length;
+	for (int i = 0; i < size; i++) {
+	    sb.append("  ").append(fields[i][0]).append(" | ").append(fields[i][1]).append(" |  ").append(fields[i][2])
+		    .append(System.lineSeparator());
+	    if (i != size - 1)
+		sb.append("-------------").append(System.lineSeparator());
+	}
+	io.write(sb.toString());
+    }
+
+}

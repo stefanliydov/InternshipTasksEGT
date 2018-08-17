@@ -1,0 +1,151 @@
+package egt.interactive.statemachine;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+public final class VendingMachine {
+    private final static String NOT_ENOUGH_MONEY_MESSAGE = "You do not have enough money for that item! Please add more coins or choose a different item!";
+    private final static String TAKE_ITEM_MESSAGE = "Please take your item!";
+    private static final String SUCCESSFULLY_ADDED_PRODUCT_MESSAGE = "Product added succesfully!";
+    private static final String INVENTORY_FULL_MESSAGE = "Inventory is full! Please make space and then add new item";
+    private States state;
+    private BigDecimal totalMoneyCollected;
+    private final Inventory inventory;
+    private BigDecimal coins;
+
+    public VendingMachine() {
+	this.state = States.STAND_BY;
+	this.totalMoneyCollected = new BigDecimal(0);
+	this.inventory = new Inventory();
+	this.coins = new BigDecimal(0);
+    }
+
+    public static boolean putInService(final VendingMachine machine) {
+	machine.state = States.SERVICE;
+	return true;
+    }
+
+    void makeItem(final Inventory.Product product) {
+	product.buyOne();
+	inventory.reArrangeItems();
+	ConsoleWriter.write(TAKE_ITEM_MESSAGE);
+    }
+
+    void setState(final States state) {
+	this.state = state;
+
+    }
+
+    public boolean addProduct(final String name, final BigDecimal price, final int quantity) {
+	if (this.state.addProduct(this)) {
+	    if (price.compareTo(BigDecimal.ZERO) < 0 || quantity <= 0) {
+		throw new IllegalArgumentException("Price of new product cannot be negative!");
+
+	    }
+
+	    if (this.inventory.addProduct(name, price, quantity)) {
+		ConsoleWriter.write(SUCCESSFULLY_ADDED_PRODUCT_MESSAGE);
+		return true;
+	    }
+	    ConsoleWriter.write(INVENTORY_FULL_MESSAGE);
+	}
+	return false;
+    }
+
+    BigDecimal returnMoneyToCustomer() {
+	final BigDecimal moneyForReturn = this.coins;
+	this.coins = new BigDecimal(0);
+	return moneyForReturn;
+    }
+
+    // Machine function methods
+    public boolean putCoins(final String coin) {
+
+	if (state.putCoins(this)) {
+	    BigDecimal money = null;
+	    try {
+		money = new BigDecimal(coin);
+		if (BigDecimal.ZERO.compareTo(money) >= 0) {
+		    throw new NumberFormatException();
+		}
+	    } catch (NumberFormatException e) {
+		ConsoleWriter.write("A fatal error has occured while machine was operating. Please call service!");
+		this.setState(States.SERVICE);
+		return false;
+	    }
+	    coins = coins.add(money);
+	    ConsoleWriter.write(this.toString());
+	    return true;
+	}
+	return false;
+    }
+
+    public boolean selectItem(final int id) {
+	if (state.selectItem(this)) {
+	    Inventory.Product product = inventory.getProduct(id);
+	    if (product == null) {
+		this.state = States.SELECTING_ITEM;
+		ConsoleWriter.write(String.format("Item with id: %s is invalid, please pick a valid id!", id));
+		return false;
+	    }
+	    if (checkIfEnoughQuantityAndMoney(product)) {
+		takeCustomersMoney(product);
+		makeItem(product);
+		return true;
+	    }
+	    this.state = States.SELECTING_ITEM;
+	}
+	return false;
+    }
+
+    public boolean takeItem() {
+	return state.takeItem(this);
+
+    }
+
+    public boolean service() {
+	return state.service(this);
+    }
+
+    public BigDecimal returnMoney() {
+	return state.returnMoney(this) ? this.returnMoneyToCustomer() : null;
+    }
+
+    private void takeCustomersMoney(final Inventory.Product product) {
+	this.coins = this.coins.subtract(product.getPrice());
+	this.totalMoneyCollected = this.totalMoneyCollected.add(product.getPrice());
+    }
+
+    private boolean checkIfEnoughQuantityAndMoney(final Inventory.Product product) {
+	// Show messages depending on what's wrong and return to selecting state
+	if (product.getPrice().compareTo(this.coins) > 0) {
+	    ConsoleWriter.write(NOT_ENOUGH_MONEY_MESSAGE);
+	    return false;
+	} else if (product.isEmpty()) {
+	    ConsoleWriter.write(
+		    String.format("Machine is all out of %s. Please choose a different item!", product.getName()));
+	    return false;
+	}
+	return true;
+    }
+
+    boolean hasMoneyLeft() {
+	return coins.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    @Override
+    public String toString() {
+	return new StringBuilder()
+		.append(String.format("Coins put: %s", this.coins.setScale(2, RoundingMode.HALF_EVEN)))
+		.append(System.lineSeparator()).append(this.inventory.toString()).toString();
+    }
+
+    public int getItemsCount() {
+	return inventory.getItemsCount();
+    }
+
+    public BigDecimal getItemPrice(final int id) {
+	return inventory.getProduct(id).getPrice();
+    }
+
+}

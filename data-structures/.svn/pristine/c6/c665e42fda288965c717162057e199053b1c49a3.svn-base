@@ -1,0 +1,61 @@
+package com.egtinteractive.data_structures.map;
+
+import java.util.ArrayList;
+
+public class MyMap<K, V> implements Map<K, V> {
+
+    private ArrayList<K> keys;
+    private ArrayList<V> values;
+
+    public MyMap() {
+	this.keys = new ArrayList<>();
+	this.values = new ArrayList<>();
+    }
+
+    @Override
+    public V get(K key) {
+	final int index = this.keys.indexOf(key);
+	
+	return index != -1 ? this.values.get(index) : null;
+    }
+
+    @Override
+    public V put(K key, V value) {
+	this.keys.add(key);
+	this.values.add(value);
+	return value;
+    }
+
+    @Override
+    public V remove(K key) {
+	final int index = this.keys.indexOf(key);
+	if (index != -1) {
+	    this.keys.remove(index);
+	    return this.values.remove(index);
+	}
+	return null;
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+	return this.keys.contains(key);
+    }
+
+    @Override
+    public boolean containsValue(V value) {
+	return this.values.contains(value);
+    }
+
+    @Override
+    public int size() {
+	return this.keys.size();
+    }
+
+    @Override
+    public void clear() {
+	this.keys = new ArrayList<>();
+	this.values = new ArrayList<>();
+
+    }
+
+}

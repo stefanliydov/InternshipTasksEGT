@@ -1,0 +1,67 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+
+public class StandByStateTests {
+
+    private VendingMachine machine;
+
+    @BeforeMethod
+    public void resetMachine() {
+	machine = new VendingMachine();
+
+    }
+
+    @Test
+    public void machineInStandByShouldNotReturnMoney() {
+	Assert.assertNull(machine.returnMoney());
+    }
+
+    @Test
+    public void machineInStandByShouldNotNeedService() {
+	Assert.assertFalse(machine.service());
+    }
+
+    @Test
+    public void machineInStandByShouldNotSelectItem() {
+	Assert.assertFalse(machine.selectItem("Kit-Kat"));
+    }
+
+    @Test
+    public void machineInStandByShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineInStandByShouldTakeCoins() {
+	Assert.assertTrue(machine.putCoins("1.23"));
+    }
+
+    @Test
+    public void machineshouldAddNewItem() {
+	Assert.assertTrue(machine.addProduct("Ice-Cream", new BigDecimal("1.10"), 10));
+    }
+
+    @Test
+    public void machineInStandByShouldChangeStateAfterPutCoins()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+	machine.putCoins("1.23");
+
+	Class<? extends VendingMachine> c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	Assert.assertEquals(state, States.SELECTING_ITEM);
+    }
+
+}

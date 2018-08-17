@@ -1,0 +1,18 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.MyDataProvider;
+
+public class ExceptionTests {
+    @DataProvider(name = "getClassStrategy")
+    public Object[][] getData() {
+	return MyDataProvider.getMapDataProvider();
+    }
+
+    @Test(dataProvider = "getClassStrategy",expectedExceptions = IllegalArgumentException.class)
+    public void addNullKeyShouldThrowExcpetion(Map<String,Integer> map){
+	map.put(null,3231);
+    }
+}

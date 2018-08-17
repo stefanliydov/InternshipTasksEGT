@@ -1,0 +1,14 @@
+package egt.interactive.testing_framework.Test;
+
+import egt.interactive.testing_framework.enums.TestingAnnotations;
+
+public class TestNG extends Test {
+    private final static TestingAnnotations ANNOTATIONS = TestingAnnotations.TEST_NG;
+
+    public TestNG() {
+	super(ANNOTATIONS.getTestAnnotation(), ANNOTATIONS.getBeforeTestAnnotation(), ANNOTATIONS.getAfterAnnotation(),
+		ANNOTATIONS.getDataProviderAnnotation());
+
+    }
+
+}

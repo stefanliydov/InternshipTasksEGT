@@ -1,0 +1,35 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class PutCoinsTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+    }
+
+    @Test
+    public void addCoinsShouldAddCoins()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	final BigDecimal amount = new BigDecimal(5.25);
+	machine.putCoins(amount.toPlainString());
+
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("coins");
+	field.setAccessible(true);
+	final BigDecimal result = (BigDecimal) field.get(machine);
+
+	Assert.assertEquals(result.setScale(2, RoundingMode.HALF_EVEN), amount.setScale(2, RoundingMode.HALF_EVEN));
+    }
+}

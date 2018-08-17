@@ -1,0 +1,153 @@
+package com.egtinteractive.data_structures.list;
+
+import java.util.Iterator;
+
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.MyDataProvider;
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class ExpectedExceptionTests {
+
+    private static final int ZERO = 0;
+    private static final int NEGATIVE_ONE = -1;
+    private int size;
+
+    @DataProvider(name = "getClass")
+    public Object[][] getData() {
+	return MyDataProvider.getListDataProvider();
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void getWithAnIndexLargerThanSizeShouldThrowException(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.get(NumberGenerator.generate(21, 30));
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void getWithANegativeIndexShouldThrowException(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.get(NEGATIVE_ONE);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void getShouldThrowExcpetionIfListIsEmpty(List<Integer> list) {
+	list.get(ZERO);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void addWithAnIndexLargerThanSizeShouldThrowException(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.add(NumberGenerator.generate(21, 30), ZERO);
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void addWithANegativeIndexShouldThrowException(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.add(NEGATIVE_ONE, ZERO);
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void removeWithIndexLargerThanSizeShouldThrowException(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.remove(NumberGenerator.generate(21, 30));
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void removeWithNegativeIndexShouldThrowException(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.remove(NEGATIVE_ONE);
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void removeWithIndexOnAnEmptyListShouldThrowException(List<Integer> list) {
+	list.remove(ZERO);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void clearShouldRemoveAllElementsAndAnyIndexOperationShouldThrowException(List<Integer> list) {
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.clear();
+
+	final boolean result = list.remove(0);
+
+	Assert.assertFalse(result);
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void setWithIndexLargerThanSizeShouldThrowException(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.set(NumberGenerator.generate(21, 30), ZERO);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void setWithNegativeIndexShouldThrowExcpetion(List<Integer> list) {
+	this.size = NumberGenerator.generate(10, 20);
+
+	for (int i = ZERO; i < this.size; i++) {
+	    list.add(i);
+	}
+
+	list.set(NEGATIVE_ONE, ZERO);
+
+    }
+
+    @Test(expectedExceptions = IndexOutOfBoundsException.class, dataProvider = "getClass")
+    public void setOnAnEmptyListShouldThrowException(List<Integer> list) {
+
+	list.set(ZERO, ZERO);
+
+    }
+    
+    @Test(expectedExceptions = IllegalStateException.class, dataProvider = "getClass")
+    public void removeWithoutNextFirstShouldThrowException(List<Integer> list){
+	for (int i = ZERO; i < this.size; i++) {
+	    final int num = NumberGenerator.generate(20000);
+	    list.add(num);
+	}
+	final int fullListSize = list.size();
+	Iterator iterator = list.iterator();
+	iterator.remove();
+	
+    }
+
+}

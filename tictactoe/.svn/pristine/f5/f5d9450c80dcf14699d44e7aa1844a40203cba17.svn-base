@@ -1,0 +1,65 @@
+package egt.interactive.tic_tac_toe;
+
+import static egt.interactive.tic_tac_toe.resources.RandomNumberGenerator.generate;
+import static org.testng.Assert.assertEquals;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.interfaces.ArcadeGame;
+
+public class putMoneyTests {
+
+    private static final int TARGET_MONEY = 10;
+    private ArcadeGame game;
+
+    @BeforeMethod
+    public void createGame() {
+	game = new TicTacToe();
+    }
+
+    @Test
+    public void machineShouldAcceptMoneyAtStartAndNotReturnMoneyIfMoneyIsLessThanNeeded() {
+	assertEquals(game.putCoins(generate(1, 9)), 0);
+
+    }
+
+    @Test
+    public void machineShouldAcceptMoneyAtStartAndNotReturnMoneyIfMoneyIsExact() {
+	assertEquals(game.putCoins(TARGET_MONEY), 0);
+
+    }
+
+    @Test
+    public void machineShouldNotLetYouContinueUntilFullAmountIsEntered() {
+	final int amount = generate(1, 10);
+	game.putCoins(amount);
+
+	assertEquals(game.getState(), States.STAND_BY);
+
+	final int nextAmount = TARGET_MONEY - amount;
+	game.putCoins(nextAmount);
+
+	assertEquals(game.getState(), States.GAME_IN_PROGRESS);
+
+    }
+
+    @Test
+    public void machineShouldReturnExtraMoneyAndChangeState() {
+	final int amount = generate(11, 50);
+	final int expectedAmount = amount - TARGET_MONEY;
+
+	final int actualAmount = game.putCoins(amount);
+
+	assertEquals(actualAmount, expectedAmount);
+	assertEquals(game.getState(), States.GAME_IN_PROGRESS);
+    }
+
+    @Test
+    public void machineShouldNotAcceptMoneyAfterGameHasStarted() {
+	game.putCoins(TARGET_MONEY);
+	Assert.assertEquals(game.putCoins(TARGET_MONEY), TARGET_MONEY);
+    }
+
+}

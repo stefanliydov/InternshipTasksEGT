@@ -1,0 +1,21 @@
+package egt.interactive.tic_tac_toe.interfaces;
+
+import egt.interactive.tic_tac_toe.GameOutCome;
+import egt.interactive.tic_tac_toe.States;
+
+public interface ArcadeGame {
+
+    public int putCoins(final int coins);
+
+    public States getState();
+
+    public boolean playMove(final int move);
+
+    public Board getBoard();
+
+    public int getCoins();
+
+    public int returnMoney();
+
+    public GameOutCome getOutCome();
+}

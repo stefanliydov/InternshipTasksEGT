@@ -1,0 +1,16 @@
+package egt.interactive.tic_tac_toe.board;
+
+import java.util.List;
+
+public interface Board {
+
+    public String getField(final int x);
+
+    public String[][] getAllFields();
+
+    public boolean addMove(final int num, final String sign);
+
+    public List<Integer> getFreeFields();
+    
+    public boolean isFull();
+}

@@ -1,0 +1,29 @@
+package egt.interactive.tic_tac_toe.resources;
+
+import egt.interactive.tic_tac_toe.ai_strategy.AiStrategy;
+import egt.interactive.tic_tac_toe.game.ArcadeGame;
+import egt.interactive.tic_tac_toe.game.StateMachineGame;
+import egt.interactive.tic_tac_toe.game.TicTacToe;
+
+public class TicTacToeFactory {
+
+    public static ArcadeGame createNewTicTacToeGame() {
+	return new TicTacToe();
+    }
+
+    public static ArcadeGame createNewPaidTicTacToeGame() {
+	ArcadeGame game = new TicTacToe();
+	game.putCoins(10);
+	return game;
+    }
+
+    public static StateMachineGame createNewPaidTicTacToeStateMachineGame() {
+	StateMachineGame game = new TicTacToe();
+	game.putCoins(10);
+	return game;
+    }
+
+    public static ArcadeGame createNewTicTacToeGameWithStrategy(final AiStrategy strategy) {
+	return new TicTacToe(strategy);
+    }
+}

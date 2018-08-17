@@ -1,0 +1,32 @@
+package egt.interactive.tic_tac_toe;
+
+import static org.testng.Assert.*;
+
+import org.testng.annotations.Test;
+
+import egt.interactive.tic_tac_toe.game.ArcadeGame;
+
+public class EndGameTests {
+
+    private ArcadeGame game;
+
+    @Test
+    public void endOfGameIfPlayerWinsShouldAskHimForHesName() {
+
+    }
+
+    @Test
+    public void endOfGameIfAIWinsShouldNotAskForPlayername() {
+
+    }
+
+    @Test
+    public void endOfGameIfDrawShouldNotAskForPlayername() {
+
+    }
+
+    @Test
+    public void endOfGameShouldReturnThreeTopPlayers() {
+
+    }
+}

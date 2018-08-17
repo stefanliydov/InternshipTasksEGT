@@ -1,0 +1,36 @@
+package egt.interactive.statemachine;
+
+class Product {
+
+    private final String name;
+    private Long price;
+
+    public Product(final String name, final Long price) {
+	this.name = name;
+	this.setPrice(price);
+
+    }
+
+    public void setPrice(Long price) {
+	if (price < 0) {
+	    throw new IllegalArgumentException("Price of new product cannot be negative!");
+
+	}
+	this.price = price;
+    }
+
+    public String getName() {
+	return this.name;
+    }
+
+    public Long getPrice() {
+	return this.price;
+    }
+
+    @Override
+    public String toString() {
+	return new StringBuilder().append(". Name: ").append(this.getName()).append(", price: ")
+		.append(String.format("%.2f", Double.valueOf(this.getPrice()) / 100)).append("$, quantity left: ")
+		.toString();
+    }
+}

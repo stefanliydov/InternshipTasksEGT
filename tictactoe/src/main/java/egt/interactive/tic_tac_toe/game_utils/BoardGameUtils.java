@@ -1,0 +1,63 @@
+package egt.interactive.tic_tac_toe.game_utils;
+
+import egt.interactive.tic_tac_toe.ai_strategy.AiStrategy;
+import egt.interactive.tic_tac_toe.ai_strategy.RandomStrategy;
+import egt.interactive.tic_tac_toe.board.Board;
+import egt.interactive.tic_tac_toe.board.TicTacToeBoard;
+import egt.interactive.tic_tac_toe.drawer.BoardDrawer;
+import egt.interactive.tic_tac_toe.game.GameOutcome;
+import egt.interactive.tic_tac_toe.game.States;
+
+public class BoardGameUtils {
+    private Board board;
+    private AiStrategy strategy;
+    private States state;
+    private GameOutcome outcome;
+    private BoardDrawer drawer;
+
+    public BoardGameUtils(final AiStrategy strategy, final TicTacToeBoard board) {
+	this.strategy = strategy;
+	this.board = board;
+    }
+
+    public Board getBoard() {
+	return board;
+    }
+
+    public void setBoard(final Board board) {
+	this.board = board;
+    }
+
+    public AiStrategy getStrategy() {
+	return strategy;
+    }
+
+    public void setStrategy(final AiStrategy strategy) {
+	this.strategy = strategy;
+    }
+
+    public States getState() {
+	return state;
+    }
+
+    public void setState(final States state) {
+	this.state = state;
+    }
+
+    public GameOutcome getOutcome() {
+	return outcome;
+    }
+
+    public void setOutcome(final GameOutcome outcome) {
+	this.outcome = outcome;
+    }
+
+    public BoardDrawer getDrawer() {
+	return drawer;
+    }
+
+    public void setDrawer(final BoardDrawer drawer) {
+	this.drawer = drawer;
+    }
+
+}

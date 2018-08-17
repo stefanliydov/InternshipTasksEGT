@@ -1,0 +1,83 @@
+package egt.interactive.tic_tac_toe.game;
+
+import egt.interactive.tic_tac_toe.connection.DBQueryExecutor;
+
+public enum GameOutcome {
+    PLAYER_WINS {
+
+	@Override
+	public void finishGame(final GameMachine game) {
+	    printPlayerVictoryMessage(game);
+	}
+
+	@Override
+	public boolean giveName(final GameMachine game, final String name) {
+	    if (name.equals("")) {
+		addGameWithNoPlayer(game);
+	    } else {
+		addGameWithPlayer(name, game);
+	    }
+	    return true;
+
+	}
+
+	private void printPlayerVictoryMessage(final GameMachine game) {
+	    game.getIO().write(game.getMessages().getPlayerVictoryMessage());
+
+	}
+
+	private void addGameWithPlayer(final String playerName, final GameMachine game) {
+	    final DBQueryExecutor connection = game.getDBQueryExecutor();
+	    if (!connection.doesPlayerExist(playerName)) {
+		connection.addPlayer(playerName);
+	    }
+	    connection.addGameWithPlayer(playerName, game.getOutCome());
+
+	}
+    },
+    AI_WINS {
+
+	@Override
+	public void finishGame(final GameMachine game) {
+	    printIOVictoryMessage(game);
+	    addGameWithNoPlayer(game);
+	}
+
+	@Override
+	public boolean giveName(final GameMachine game, final String name) {
+	    return false;
+	}
+
+	private void printIOVictoryMessage(final GameMachine game) {
+	    game.getIO().write(game.getMessages().getAiVictoryMessage());
+
+	}
+    },
+    DRAW {
+
+	@Override
+	public void finishGame(final GameMachine game) {
+	    printDrawMessage(game);
+	    addGameWithNoPlayer(game);
+	}
+
+	@Override
+	public boolean giveName(final GameMachine game, final String name) {
+	    return false;
+	}
+
+	private void printDrawMessage(final GameMachine game) {
+	    game.getIO().write(game.getMessages().getDrawMessage());
+
+	}
+    };
+
+    public void addGameWithNoPlayer(final GameMachine game) {
+	game.getDBQueryExecutor().addGameWithNoPlayer(game.getOutCome());
+
+    }
+
+    public abstract void finishGame(final GameMachine game);
+
+    public abstract boolean giveName(final GameMachine game, final String name);
+}

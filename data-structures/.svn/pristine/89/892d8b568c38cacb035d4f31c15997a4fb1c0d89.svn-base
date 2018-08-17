@@ -1,0 +1,35 @@
+package com.egtinteractive.data_structures;
+
+import java.util.Iterator;
+
+import com.egtinteractive.data_structures.list.LinkedList;
+import com.egtinteractive.data_structures.list.List;
+import com.egtinteractive.data_structures.map.CollisionSolvingStrategy;
+
+/**
+ * Hello world!
+ *
+ */
+public class App {
+    public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
+	    IllegalAccessException, NoSuchMethodException, SecurityException {
+	
+	
+	
+	
+	List<Integer> list = new LinkedList<>();
+	list.add(1);
+	list.add(2);
+	list.add(3);
+	list.add(4);
+	
+	Iterator listIterator = list.iterator();
+	
+	listIterator.next();
+	listIterator.remove();
+	Object O = null;
+	System.out.println();
+	 
+
+    }
+}

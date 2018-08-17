@@ -1,0 +1,135 @@
+package egt.interactive.statemachine;
+
+import egt.interactive.statemachine.inventory.Inventory;
+import egt.interactive.statemachine.product.Product;
+import egt.interactive.writer.ConsoleWriter;
+
+public final class VendingMachine {
+    private final static String NOT_ENOUGH_MONEY_MESSAGE = "You do not have enough money for that item! Please add more coins or choose a different item!";
+    private final static String TAKE_ITEM_MESSAGE = "Please take your item!";
+    private final static String SUCCESSFULLY_ADDED_PRODUCT_MESSAGE = "Product added succesfully!";
+    private final static String INVENTORY_FULL_MESSAGE = "Inventory is full! Please make space and then add new item";
+    final Inventory inventory;
+    private States state;
+    private Long totalMoneyCollected;
+    private Long coins;
+
+    public VendingMachine() {
+	this.state = States.STAND_BY;
+	this.totalMoneyCollected = 0L;
+	this.inventory = new Inventory();
+	this.coins = 0L;
+    }
+
+    // Machine function methods
+    public Long putCoins(final Long coin) {
+
+	return state.putCoins(this, coin) ? this.coins : null;
+    }
+
+    public Product selectItem(final String name) {
+	return this.state.selectItem(this, name) ? this.getProduct(name) : null;
+    }
+
+    public boolean takeItem() {
+	return state.takeItem(this);
+
+    }
+
+    public boolean service() {
+	return state.service(this);
+    }
+
+    public Long returnMoney() {
+	return state.returnMoney(this) ? this.returnMoneyToCustomer() : null;
+    }
+
+    public int getItemsCount() {
+	return inventory.getItemsCount();
+    }
+
+    public Long getItemPrice(final String name) {
+	return inventory.getProduct(name).getPrice();
+    }
+
+    public Long getTotalMoney() {
+	return this.totalMoneyCollected;
+    }
+
+    public Long getCoins() {
+	return this.coins;
+    }
+
+    public boolean addProduct(final String name, final Long price, final int quantity) {
+	return (this.state.addProduct(this, name, price, quantity));
+
+    }
+
+    void takeCustomersMoney(final Product product) {
+	this.coins -= product.getPrice();
+	this.totalMoneyCollected += product.getPrice();
+    }
+
+    void makeItem(final Product product) {
+	inventory.buyOne(product);
+	ConsoleWriter.write(TAKE_ITEM_MESSAGE);
+    }
+
+    void setState(final States state) {
+	this.state = state;
+
+    }
+
+    Long returnMoneyToCustomer() {
+	final Long moneyForReturn = this.coins;
+	this.coins = 0L;
+	return moneyForReturn;
+    }
+
+    boolean checkIfEnoughQuantityAndMoney(final Product product) {
+	// Show messages depending on what's wrong and return to selecting state
+	if (product.getPrice() > this.coins) {
+	    ConsoleWriter.write(NOT_ENOUGH_MONEY_MESSAGE);
+	    return false;
+	} else if (inventory.getProductQuantity(product) <= 0) {
+	    ConsoleWriter.write(
+		    String.format("Machine is all out of %s. Please choose a different item!", product.getName()));
+	    return false;
+	}
+	return true;
+    }
+
+    boolean hasMoneyLeft() {
+	return coins > 0;
+    }
+
+    void addCoinsToMachine(Long money) {
+	coins += money;
+    }
+
+    Product getProduct(String name) {
+	return inventory.getProduct(name);
+    }
+
+    void printItemAdded() {
+	ConsoleWriter.write(SUCCESSFULLY_ADDED_PRODUCT_MESSAGE);
+    }
+
+    void printItemNotAdded() {
+	ConsoleWriter.write(INVENTORY_FULL_MESSAGE);
+
+    }
+
+    @Override
+    public String toString() {
+	return new StringBuilder().append(String.format("Coins put: %.2f", Double.valueOf(this.coins) / 100))
+		.append(System.lineSeparator()).append(this.inventory).toString();
+    }
+
+    public void isMoneyValid(Long coin) {
+	if (coin <= 0) {
+	    throw new IllegalArgumentException("Money cannot be negative or zero");
+	}
+    }
+
+}

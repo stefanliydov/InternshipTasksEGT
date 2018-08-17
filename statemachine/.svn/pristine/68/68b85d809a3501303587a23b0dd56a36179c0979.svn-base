@@ -1,0 +1,69 @@
+package statemachine;
+
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.VendingMachine;
+
+public class PutCoinsTests {
+
+    @DataProvider(name = "getFullMachine")
+    public Object[][] getData() {
+	return resources.MyDataProvider.getFullMachineDataProvider();
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void addCoinsShouldAddCoins(final VendingMachine machine) {
+	final long amount = ThreadLocalRandom.current().nextLong(500, 1000);
+	machine.putCoins(amount);
+
+	final long result = machine.getCoins();
+
+	Assert.assertEquals(result, amount);
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void addNegativeAmountOfCoinsShouldReturnZeroCoinsInMachine(final VendingMachine machine) {
+	final long amount = ThreadLocalRandom.current().nextLong(-200, 0);
+	final long actual = machine.putCoins(amount);
+	Assert.assertEquals(actual, 0l);
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void addZeroAmountOfCoinsShouldReturnZeroCoinsInMachine(final VendingMachine machine) {
+	final long invalidAmount = 0l;
+	final long actual = machine.putCoins(invalidAmount);
+	Assert.assertEquals(actual, 0l);
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void addCoinsThenAddInvalidCoinsShoudReturnTheCorrectCoins(final VendingMachine machine) {
+	final long expectedAmount = ThreadLocalRandom.current().nextLong(500, 1000);
+	final long coinsInMachine = machine.putCoins(expectedAmount);
+	Assert.assertEquals(coinsInMachine, expectedAmount);
+
+	final long invalidAmount = ThreadLocalRandom.current().nextLong(-200, 0);
+	final long actual = machine.putCoins(invalidAmount);
+
+	Assert.assertEquals(actual, expectedAmount);
+    }
+
+    @Test(dataProvider = "getFullMachine")
+    public void addCoinsManyTimesShouldReturnCorrectAmount(final VendingMachine machine) {
+	long expectedAmount = 0l;
+	final int count = ThreadLocalRandom.current().nextInt(30, 100);
+	for (int i = 0; i < count; i++) {
+	    long amount = ThreadLocalRandom.current().nextLong(500, 1000);
+	    machine.putCoins(amount);
+	    expectedAmount += amount;
+	}
+
+	final long actual = machine.getCoins();
+
+	Assert.assertEquals(actual, expectedAmount);
+    }
+
+}

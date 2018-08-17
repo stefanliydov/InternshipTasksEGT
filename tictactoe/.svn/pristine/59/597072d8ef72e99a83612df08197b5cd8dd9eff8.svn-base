@@ -1,0 +1,46 @@
+package egt.interactive.tic_tac_toe.connection;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class DBCredentials {
+    private final static String CONFIG_PATH = "src/main/resources/config.properties";
+    private final String URL;
+    private String USER;
+    private String PASSWORD;
+
+    public DBCredentials() {
+	final Properties prop = getCredentials();
+	this.USER = prop.getProperty("dbuser");
+	this.PASSWORD = prop.getProperty("dbpassword");
+	final String db = prop.getProperty("database");
+	this.URL = "jdbc:mysql://" + db
+		+ ":3306/tic_tac_toe?createDatabaseIfNotExist=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    }
+
+    private Properties getCredentials() {
+	final Properties prop = new Properties();
+
+	try (InputStream input = new FileInputStream(CONFIG_PATH);) {
+	    prop.load(input);
+	    return prop;
+	} catch (IOException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    public String getURL() {
+	return URL;
+    }
+
+    public String getUSER() {
+	return USER;
+    }
+
+    public String getPASSWORD() {
+	return PASSWORD;
+    }
+
+}

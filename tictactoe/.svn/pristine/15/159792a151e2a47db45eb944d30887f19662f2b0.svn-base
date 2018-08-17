@@ -1,0 +1,31 @@
+package egt.interactive.tic_tac_toe;
+
+public enum GameOutCome {
+    PLAYER_WINS {
+	@Override
+	public void finishGame(final StateMachineGame game) {
+	    game.printPlayerVictoryMessage();
+	    final String playerName = game.takeName();
+	    game.addGameWithPlayer(playerName);
+	    game.printTopThreePlayers();
+	}
+    },
+    AI_WINS {
+	@Override
+	public void finishGame(final StateMachineGame game) {
+	    game.printIOVictoryMessage();
+	    game.addGameWithNoPlayer();
+	    game.printTopThreePlayers();
+	}
+    },
+    DRAW {
+	@Override
+	public void finishGame(final StateMachineGame game) {
+	    game.printDrawMessage();
+	    game.addGameWithNoPlayer();
+	    game.printTopThreePlayers();
+	}
+    };
+
+    public abstract void finishGame(final StateMachineGame game);
+}

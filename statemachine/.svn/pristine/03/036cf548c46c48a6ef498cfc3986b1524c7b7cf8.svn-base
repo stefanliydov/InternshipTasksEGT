@@ -1,0 +1,140 @@
+package statemachine;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+
+public class ComplexTests {
+
+    VendingMachine machine;
+
+    @BeforeMethod
+    public void machineReset() {
+	machine = new VendingMachine();
+    }
+
+    @Test
+    public void aLotOfDifferentPurchasesShouldAddToMachineMoney()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+	BigDecimal moneyCollected = new BigDecimal(0);
+
+	machine.putCoins("5");
+	if (machine.selectItem(1)) {
+	    moneyCollected = moneyCollected.add(machine.getItemPrice(1));
+	    machine.takeItem();
+	}
+
+	if (machine.selectItem(1)) {
+	    moneyCollected = moneyCollected.add(machine.getItemPrice(1));
+	    machine.takeItem();
+	}
+	machine.returnMoney();
+	Assert.assertTrue(machineIsInStandBy());
+
+	machine.putCoins("5");
+	machine.returnMoney();
+
+	Assert.assertTrue(machineIsInStandBy());
+
+	machine.putCoins("3");
+	if (machine.selectItem(6)) {
+	    moneyCollected = moneyCollected.add(machine.getItemPrice(6));
+	}
+	;
+	machine.takeItem();
+	if (machine.selectItem(6)) {
+	    moneyCollected = moneyCollected.add(machine.getItemPrice(6));
+	    machine.takeItem();
+	}
+
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("totalMoneyCollected");
+	field.setAccessible(true);
+	BigDecimal totalMoney = (BigDecimal) field.get(machine);
+
+	Assert.assertEquals(totalMoney.setScale(2, RoundingMode.HALF_EVEN),
+		moneyCollected.setScale(2, RoundingMode.HALF_EVEN));
+
+    }
+
+    @Test
+    public void aLotOfDifferentOperationsAndThenErrorShouldStillHaveTotalMoney()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+	BigDecimal moneyCollected = new BigDecimal(0);
+	machine.putCoins(String.valueOf(ThreadLocalRandom.current().nextDouble(20, 40)));
+	final int count = ThreadLocalRandom.current().nextInt(10, 30);
+	for (int i = 0; i < count; i++) {
+	    final int id = ThreadLocalRandom.current().nextInt(6);
+	    if (machine.selectItem(id)) {
+		moneyCollected = moneyCollected.add(machine.getItemPrice(id));
+		machine.takeItem();
+	    }
+	}
+
+	machine.putCoins("Asd");
+
+	machine.service();
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("totalMoneyCollected");
+	field.setAccessible(true);
+	BigDecimal totalMoney = (BigDecimal) field.get(machine);
+
+	Assert.assertEquals(totalMoney.setScale(2, RoundingMode.HALF_EVEN),
+		moneyCollected.setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+    @Test
+    public void addingNewItemThenBuyingAllOfItShouldRemoveIt() {
+	VendingMachine machine = new VendingMachine();
+	String m = "3.00";
+	final int count = ThreadLocalRandom.current().nextInt(5, 30);
+
+	machine.addProduct("Milka", new BigDecimal(1.00), count);
+	machine.putCoins(String.valueOf(count + 1));
+	for (int i = 0; i < count; i++) {
+	    Assert.assertTrue(machine.selectItem(7));
+	    machine.takeItem();
+	}
+
+	Assert.assertFalse(machine.selectItem(7));
+    }
+
+    @Test
+    public void buyAllProducts() {
+	final int count = machine.getItemsCount();
+	machine.putCoins(String.valueOf("450"));
+	boolean found = true;
+	while (found) {
+	    found = false;
+	    for (int i = 0; i < count; i++) {
+		if (machine.selectItem(i)) {
+		    found = true;
+		}
+		machine.takeItem();
+	    }
+	}
+	System.out.println(machine.returnMoney());
+	Assert.assertEquals(machine.getItemsCount(), 0);
+    }
+
+    private boolean machineIsInStandBy()
+	    throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	Class c = machine.getClass();
+	Field field = c.getDeclaredField("state");
+	field.setAccessible(true);
+	States state = (States) field.get(machine);
+
+	return state.equals(States.STAND_BY);
+    }
+
+}

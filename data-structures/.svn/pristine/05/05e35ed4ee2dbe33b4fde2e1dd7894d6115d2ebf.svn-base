@@ -1,0 +1,66 @@
+package com.egtinteractive.data_structures.map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.egtinteractive.data_structures.resources.NumberGenerator;
+
+public class ClearTests {
+
+    private static final int ONE = 1;
+    private static final int ZERO = 0;
+    Map<Integer, Integer> map;
+    private int size;
+
+    @BeforeClass
+    public void setSize() {
+	this.size = NumberGenerator.generate(70, 250);
+    }
+
+    @BeforeMethod
+    public void mapReset() {
+	this.map = new MyMap<>();
+    }
+
+    @Test
+    public void clearShouldClearAllElements() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put(i, i);
+	}
+
+	this.map.clear();
+
+	for (int i = ONE; i < this.size; i++) {
+
+	    final boolean keyResult = this.map.containsKey(i);
+	    final boolean valueResult = this.map.containsValue(i);
+	    Assert.assertFalse(keyResult);
+	    Assert.assertFalse(valueResult);
+	}
+
+    }
+
+    @Test
+    public void clearShouldResetSize() {
+	for (int i = ONE; i < this.size; i++) {
+	    this.map.put(i, i);
+	}
+
+	this.map.clear();
+
+	final int result = this.map.size();
+
+	Assert.assertEquals(ZERO, result);
+    }
+
+    @Test
+    public void clearOnAnEmptyMapShouldDoNothing() {
+	this.map.clear();
+
+	final int result = this.map.size();
+
+	Assert.assertEquals(ZERO, result);
+    }
+}

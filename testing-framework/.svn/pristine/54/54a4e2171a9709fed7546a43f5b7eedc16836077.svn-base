@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite guice-stage="DEVELOPMENT" name="Failed suite [Default suite]">
+  <test thread-count="5" name="Default test(failed)">
+    <classes>
+      <class name="egt.interactive.testing_framework.resources.test_ng.UnexpectedExceptionTest">
+        <methods>
+          <include name="throwWrongException"/>
+        </methods>
+      </class> <!-- egt.interactive.testing_framework.resources.test_ng.UnexpectedExceptionTest -->
+      <class name="egt.interactive.testing_framework.resources.test_ng.MultipleAssertsTests">
+        <methods>
+          <include name="multipleAssertThenOneWrongShouldGiveFalse"/>
+        </methods>
+      </class> <!-- egt.interactive.testing_framework.resources.test_ng.MultipleAssertsTests -->
+      <class name="egt.interactive.testing_framework.resources.test_ng.ExpectedExceptionNotFoundTest">
+        <methods>
+          <include name="shouldGiveWrongAnswerIfNoErrorIsThrown"/>
+        </methods>
+      </class> <!-- egt.interactive.testing_framework.resources.test_ng.ExpectedExceptionNotFoundTest -->
+      <class name="egt.interactive.testing_framework.resources.test_ng.IncorrectTest">
+        <methods>
+          <include name="incorrectTest"/>
+        </methods>
+      </class> <!-- egt.interactive.testing_framework.resources.test_ng.IncorrectTest -->
+    </classes>
+  </test> <!-- Default test(failed) -->
+</suite> <!-- Failed suite [Default suite] -->

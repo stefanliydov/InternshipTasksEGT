@@ -1,0 +1,13 @@
+package egt.interactive.testing_framework.resources.test_ng;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+public class BeforeTestExecutionTest extends BaseTest {
+
+    @Test
+    void numShouldBeFive() {
+	Assert.assertEquals(num, 5);
+    }
+
+}

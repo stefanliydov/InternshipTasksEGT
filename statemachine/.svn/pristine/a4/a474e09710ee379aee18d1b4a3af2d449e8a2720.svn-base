@@ -1,0 +1,91 @@
+package statemachine;
+
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import machinefactory.VendingMachineFactory;
+import resources.MachineLoader;
+import resources.MyReflection;
+import resources.ProductNames;
+
+public class TakeItemStateTests {
+    private static final String NAME = UUID.randomUUID().toString();
+    private VendingMachine machine;
+
+    @BeforeMethod
+    public void addSomeCashInMachine() {
+	machine = VendingMachineFactory.createVendingMachine();
+	MachineLoader.loadMachine(machine);
+	machine.putCoins(ThreadLocalRandom.current().nextLong(500, 1000));
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+	machine.selectItem(productName);
+    }
+
+    @Test
+    public void machineDoesEnterServiceIfNeededAndReturnsMoney() {
+	Assert.assertTrue(machine.service());
+	Assert.assertTrue(machine.service());
+	final long result = machine.getCoins();
+	Assert.assertEquals(result, 0L);
+    }
+
+    @Test
+    public void machineDoesNotAcceptCoins() {
+	final long money = ThreadLocalRandom.current().nextLong(500, 1000);
+	final long expectedMoney = machine.getCoins();
+	Assert.assertEquals(machine.putCoins(money), expectedMoney);
+    }
+
+    @Test
+    public void machineDoesNotSelectItem() {
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+	Assert.assertNull(machine.selectItem(productName));
+    }
+
+    @Test
+    public void machineGivesCustomerItem() {
+	Assert.assertTrue(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldNotLetYouAddProductsWhileItsWorking() {
+	Assert.assertFalse(machine.addProduct(NAME, ThreadLocalRandom.current().nextLong(10, 15),
+		ThreadLocalRandom.current().nextInt(2, 5)));
+    }
+
+    @Test
+    public void machineDoesNotGiveMoneyBack() {
+	Assert.assertNull(machine.returnMoney());
+    }
+
+    @Test
+    public void machineGoesBackToSelectingStateIfThereAreMoneyLeftAfterTakingItem() {
+	machine.takeItem();
+	Assert.assertTrue(MyReflection.isStateCorrect(machine, States.SELECTING_ITEM));
+    }
+
+    @Test
+    public void machineChangesStateToStandByIfMoneyIsZeroAfterTakingItem() {
+	machine.takeItem();
+	machine.returnMoney();
+	final long cost = ThreadLocalRandom.current().nextLong(500, 1000);
+	machine.service();
+	machine.addProduct(NAME, cost, 1);
+	machine.service();
+	machine.putCoins(cost);
+
+	machine.selectItem(NAME);
+	Assert.assertTrue(machine.takeItem());
+
+	Assert.assertTrue(MyReflection.isStateCorrect(machine, States.STAND_BY));
+    }
+
+}

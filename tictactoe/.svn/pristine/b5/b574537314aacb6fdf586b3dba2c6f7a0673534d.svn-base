@@ -1,0 +1,336 @@
+package egt.interactive.tic_tac_toe.game;
+
+import egt.interactive.tic_tac_toe.ai_strategy.AiStrategy;
+import egt.interactive.tic_tac_toe.ai_strategy.RandomStrategy;
+import egt.interactive.tic_tac_toe.board.Board;
+import egt.interactive.tic_tac_toe.board.TicTacToeBoard;
+import egt.interactive.tic_tac_toe.connection.ConnectionClass;
+import egt.interactive.tic_tac_toe.drawer.BoardDrawer;
+import egt.interactive.tic_tac_toe.drawer.TicTacToeBoardDrawer;
+import egt.interactive.tic_tac_toe.io.ConsoleIO;
+import egt.interactive.tic_tac_toe.io.IO;
+import egt.interactive.tic_tac_toe.states.States;
+import egt.interactive.tic_tac_toe.states.GameOutCome;
+
+public class TicTacToe extends StateMachineGame {
+
+    private final static int NEEDED_MONEY = 10;
+    private final static String INVALID_MOVE = "The move is not valid, please choose a different position!";
+    private final static String PLAYER_SIGN = "X";
+    private final static String AI_SIGN = "O";
+    private final static int SIZE = 3;
+    private final static String PLAYER_VICTORY_MESSAGE = "Congratulations! You have won!\nPlease enter your name";
+    private final static String AI_VICTORY_MESSAGE = "Game over! You have lost...";
+    private final static String DRAW_MESSAGE = "Good job! It's a draw!";
+    private final Board board;
+    private final BoardDrawer drawer;
+    private final IO io;
+    private final AiStrategy ai;
+    private final ConnectionClass connection;
+    private States state;
+    private int totalMoneyCollected;
+    private int coins;
+    private GameOutCome outcome;
+
+    public TicTacToe() {
+	this.ai = new RandomStrategy();
+	this.io = new ConsoleIO();
+	this.board = new TicTacToeBoard();
+	this.drawer = new TicTacToeBoardDrawer(this.io);
+	this.state = States.STAND_BY;
+	this.connection = new ConnectionClass();
+    }
+
+    public TicTacToe(final AiStrategy strategy) {
+	this.ai = strategy;
+	this.io = new ConsoleIO();
+	this.board = new TicTacToeBoard();
+	this.drawer = new TicTacToeBoardDrawer(this.io);
+	this.state = States.STAND_BY;
+	this.connection = new ConnectionClass();
+    }
+
+    public TicTacToe(final AiStrategy strategy, final Board board) {
+	this.ai = strategy;
+	this.io = new ConsoleIO();
+	this.board = board;
+	this.drawer = new TicTacToeBoardDrawer(this.io);
+	this.state = States.STAND_BY;
+	this.connection = new ConnectionClass();
+    }
+
+    public TicTacToe(final Board board) {
+	this.ai = new RandomStrategy();
+	this.io = new ConsoleIO();
+	this.board = board;
+	this.drawer = new TicTacToeBoardDrawer(this.io);
+	this.state = States.STAND_BY;
+	this.connection = new ConnectionClass();
+    }
+
+    @Override
+    public int putCoins(final int coins) {
+	return this.state.putCoins(this, coins) ? this.returnExtraMoney() : coins;
+
+    }
+
+    @Override
+    public boolean playMove(final int move) {
+
+	return this.state.playMove(this, move);
+    }
+
+    @Override
+    public int returnMoney() {
+	if (this.state.returnMoney(this)) {
+	    final int temp = this.coins;
+	    this.coins = 0;
+	    return temp;
+	}
+	return 0;
+    }
+
+    @Override
+    public Board getBoard() {
+	return this.board;
+    }
+
+    @Override
+    public States getState() {
+	return this.state;
+    }
+
+    @Override
+    public int getCoins() {
+	return this.coins;
+    }
+
+    public boolean isMoneyValid(final int coins) {
+	return coins > 0;
+    }
+
+    @Override
+    public void insertCash(final int coins) {
+	this.coins += coins;
+
+    }
+
+    @Override
+    public boolean isMoneyEnough() {
+	return this.coins >= NEEDED_MONEY;
+    }
+
+    @Override
+    public void setState(States state) {
+	this.state = state;
+
+    }
+
+    @Override
+    public void beginGame() {
+	this.totalMoneyCollected += NEEDED_MONEY;
+	drawBoard();
+    }
+
+    @Override
+    public void drawBoard() {
+	drawer.drawBoard(this.board);
+    }
+
+    @Override
+    public void askForMoreMoney() {
+	final int moneyToAdd = NEEDED_MONEY - this.coins;
+	io.write(String.format("Please insert %d more", moneyToAdd));
+    }
+
+    @Override
+    public boolean isFieldFree(final int move) {
+	return board.getField(move).equals(" ");
+    }
+
+    @Override
+    public void invalidField() {
+	io.write(INVALID_MOVE);
+
+    }
+
+    private int returnExtraMoney() {
+	if (this.coins > 10) {
+	    return coins - 10;
+	}
+	return 0;
+    }
+
+    private Integer playAI() {
+	final Integer aiMove = this.ai.playAIMove(this.board);
+	if (aiMove != null) {
+	    this.board.addMove(aiMove, AI_SIGN);
+	}
+	return aiMove;
+    }
+
+    @Override
+    public GameOutCome getOutCome() {
+	return this.outcome;
+    }
+
+    @Override
+    public IO getIO() {
+	return this.io;
+    }
+
+    @Override
+    public void printPlayerVictoryMessage() {
+	io.write(PLAYER_VICTORY_MESSAGE);
+
+    }
+
+    @Override
+    public void printIOVictoryMessage() {
+	io.write(AI_VICTORY_MESSAGE);
+
+    }
+
+    @Override
+    public void printDrawMessage() {
+	io.write(DRAW_MESSAGE);
+
+    }
+
+    @Override
+    public boolean hasPlayerWon(final int move) {
+	if (isWinner(move)) {
+	    // player wins
+	    this.outcome = GameOutCome.PLAYER_WINS;
+	    return true;
+	}
+	return false;
+    }
+
+    @Override
+    public void addPlayerMove(final int move) {
+	this.board.addMove(move, PLAYER_SIGN);
+    }
+
+    @Override
+    public int addAIMove(final int move) {
+	return this.playAI();
+    }
+
+    @Override
+    public boolean isGameDraw() {
+	if (this.board.getFreeFields().size() == 0) {
+	    // game is draw
+	    this.outcome = GameOutCome.DRAW;
+	    return true;
+	}
+	return false;
+    }
+
+    @Override
+    public void addGameWithNoPlayer() {
+	this.connection.addGameWithNoPlayer(this.outcome);
+
+    }
+
+    @Override
+    public void addGameWithPlayer(final String playerName) {
+	if (!this.connection.doesPlayerExist(playerName)) {
+	    this.connection.addPlayer(playerName);
+	}
+	this.connection.addGameWithPlayer(playerName, this.outcome);
+
+    }
+
+    @Override
+    public void printTopThreePlayers() {
+	final String hallOfFame = this.connection.getTopThreePlayers();
+	io.write(hallOfFame);
+
+    }
+
+    @Override
+    public void setOutcome(GameOutCome outcome) {
+	this.outcome = outcome;
+
+    }
+
+    @Override
+    public boolean giveName(final String name) {
+	return this.outcome.giveName(this, name);
+
+    }
+
+    @Override
+    public boolean endGame() {
+	return this.state.endGame(this);
+    }
+
+    @Override
+    public boolean isGameOver(final int move, final int aIMove) {
+	if (isWinner(aIMove)) {
+	    // aiWins
+	    this.outcome = GameOutCome.AI_WINS;
+	    return true;
+	}
+	return false;
+    }
+
+    @Override
+    public int getTotalMoney() {
+	return this.totalMoneyCollected;
+    }
+
+    private boolean isWinner(final int move) {
+	String[][] fields = this.board.getAllFields();
+	final int x = move / SIZE;
+	final int y = move % SIZE;
+	final String sign = fields[x][y];
+	return this.checkCol(fields, x, sign, move) || this.checkRow(fields, y, sign, move)
+		|| this.checkDiag(fields, x, y, sign, move) || this.checkAntiDiag(fields, x, y, sign, move);
+    }
+
+    private boolean checkAntiDiag(final String[][] fields, final int x, final int y, final String sign,
+	    final int move) {
+	if (x + y == SIZE - 1) {
+	    for (int i = 0; i < SIZE; i++) {
+		if (fields[i][(SIZE - 1) - i] != sign) {
+		    return false;
+		}
+	    }
+	    return true;
+	}
+	return false;
+    }
+
+    private boolean checkDiag(final String[][] fields, final int x, final int y, final String sign, final int move) {
+	if (x == y) {
+	    for (int i = 0; i < SIZE; i++) {
+		if (fields[i][i] != sign) {
+		    return false;
+		}
+	    }
+	    return true;
+	}
+	return false;
+    }
+
+    private boolean checkRow(final String[][] fields, final int y, final String sign, final int move) {
+	for (int i = 0; i < SIZE; i++) {
+	    if (fields[i][y] != sign) {
+		return false;
+	    }
+	}
+	return true;
+    }
+
+    private boolean checkCol(final String[][] fields, final int x, final String sign, final int move) {
+	for (int i = 0; i < SIZE; i++) {
+	    if (fields[x][i] != sign) {
+		return false;
+	    }
+	}
+	return true;
+    }
+
+}

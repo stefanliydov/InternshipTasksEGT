@@ -1,0 +1,20 @@
+package egt.interactive.testing_framework.resources;
+
+import egt.interactive.testing_framework.MethodsClaimer;
+import egt.interactive.testing_framework.enums.TestingAnnotations;
+import egt.interactive.testing_framework.io.IO;
+
+public class MyDataProvider {
+
+    public static Object[][] getMethodsClaimerCustomAnnotations(final IO io) {
+	return new Object[][] { { new MethodsClaimer(io, TestingAnnotations.MY_ANNOTATIONS) } };
+    }
+
+    public static Object[][] getMethodsClaimerTestng(final IO io) {
+	return new Object[][] { { new MethodsClaimer(io, TestingAnnotations.TEST_NG) } };
+    }
+
+    public static Object[][] getMethodsClaimer() {
+	return new Object[][] { { new MethodsClaimer(TestingAnnotations.TEST_NG) } };
+    }
+}

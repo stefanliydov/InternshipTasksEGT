@@ -1,0 +1,68 @@
+package statemachine;
+
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import egt.interactive.statemachine.States;
+import egt.interactive.statemachine.VendingMachine;
+import egt.interactive.writer.ConsoleWriter;
+import resources.MyReflection;
+import resources.ProductNames;
+
+public class ServiceStateTests {
+    private static final int DEFAULT_MACHINE_SIZE = 16;
+    private static final String NAME = UUID.randomUUID().toString();
+    private VendingMachine machine;
+
+    @BeforeMethod
+    public void createMachine() {
+	machine = new VendingMachine(DEFAULT_MACHINE_SIZE, new ConsoleWriter());
+	machine.service();
+
+    }
+
+    @Test
+    public void machineShouldNotAcceptCoins() {
+	final long money = ThreadLocalRandom.current().nextLong(500, 1000);
+	Assert.assertEquals(machine.putCoins(money), 0L);
+    }
+
+    @Test
+    public void machineShouldNotSelectItem() {
+	final String productName = ProductNames.values()[ThreadLocalRandom.current()
+		.nextInt(ProductNames.values().length)].getName();
+	Assert.assertNull(machine.selectItem(productName));
+    }
+
+    @Test
+    public void machineShouldNotGiveItem() {
+	Assert.assertFalse(machine.takeItem());
+    }
+
+    @Test
+    public void machineShouldNotReturnMoney() {
+	Assert.assertNull(null);
+    }
+
+    @Test
+    public void machineShouldLetYouAddProductsWhileItsWorking() {
+	Assert.assertTrue(machine.addProduct(NAME, 10L, 1));
+    }
+
+    @Test
+    public void machineShouldAcceptService() {
+	Assert.assertTrue(machine.service());
+    }
+
+    @Test
+    public void machineShouldGoBackToStandByAfterGettingServiced() {
+	Assert.assertTrue(machine.service());
+
+	MyReflection.isStateCorrect(machine, States.STAND_BY);
+    }
+
+}

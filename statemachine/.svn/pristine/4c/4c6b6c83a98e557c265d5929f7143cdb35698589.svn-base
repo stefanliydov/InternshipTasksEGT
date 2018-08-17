@@ -1,0 +1,44 @@
+package egt.interactive.statemachine;
+
+public final class VendingMachine {
+    private States state;
+
+    public VendingMachine() {
+	this.state = States.STAND_BY;
+
+    }
+
+    public static boolean putInService(final VendingMachine machine) {
+	machine.state = States.SERVICE;
+	return true;
+    }
+
+    void makeItem() {
+	System.out.println("Making item, please wait....");
+    }
+
+    public boolean putCoins() {
+	return state.putCoins(this);
+    }
+
+    public boolean selectItem() {
+	return state.selectItem(this);
+    }
+
+    public boolean takeItem() {
+	return state.takeItem(this);
+    }
+
+    public boolean service() {
+	return state.service(this);
+    }
+
+    public boolean returnMoney() {
+	return state.returnMoney(this);
+    }
+
+    void setState(States state) {
+	this.state = state;
+    }
+
+}
